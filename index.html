@@ -1,296 +1,1448 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Pedidos CEASA</title>
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="icon-180.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Pedidos">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#15402a">
-<style>
-:root{--bg:#eceff1;--card:#fff;--ink:#17212b;--mut:#5f6b76;--line:#dde2e6;--ac:#1f6f43;--acs:#e3f1e9;--warn:#fff4d6;--warni:#7a5200;--err:#fde7e4;--erri:#8a1f11;--hd:#15402a}
-@media(prefers-color-scheme:dark){:root{--bg:#0e1411;--card:#172019;--ink:#e8efe9;--mut:#93a398;--line:#2a362d;--ac:#5fc287;--acs:#1d3a28;--warn:#3d3312;--warni:#f1cf7a;--err:#45201c;--erri:#f5aaa0}}
-*{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 "Avenir Next","Segoe UI",system-ui,sans-serif;-webkit-text-size-adjust:100%}
-button{font:inherit;color:inherit;cursor:pointer;min-height:40px;padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:var(--card)}
-button:hover{border-color:var(--ac)}button:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-.top{position:sticky;top:0;z-index:10;display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--hd);color:#fff;padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
-.brand{display:flex;align-items:center;gap:10px;min-width:0}
-.logo{width:34px;height:34px;flex:none;border-radius:9px;background:#fff1}
-.t{font-weight:700;font-size:17px;letter-spacing:.2px}
-.nome{all:unset;cursor:pointer;display:block;font-size:12.5px;color:#cfe6d8;border-bottom:1px dotted #cfe6d8;max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.acts{display:flex;gap:8px}.acts button{background:#ffffff1a;border-color:#ffffff33;color:#fff;min-height:38px}
-main{max-width:1240px;margin:0 auto;padding:14px 16px 90px}
-.stats{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
-.stats span{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 14px;font-size:14px;color:var(--mut)}
-.stats b{color:var(--ink);font-variant-numeric:tabular-nums;font-size:16px}.stats .w{background:var(--warn);border-color:transparent;color:var(--warni)}.stats .w b{color:var(--warni)}
-.cols{display:grid;grid-template-columns:minmax(300px,380px) 1fr;gap:16px;align-items:start}
-.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:14px}
-.card h2{font-size:16px;margin:0 0 10px}.hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.hd h2{margin:0}
-textarea{display:block;width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);font:14px/1.4 ui-monospace,Consolas,monospace;resize:vertical}
-#novo{height:170px}#txt{height:240px;margin-top:10px}
-.row{display:flex;gap:8px;margin-top:10px}.row button{flex:1}
-.pri{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:700}@media(prefers-color-scheme:dark){.pri{color:#0e1411}}
-.hint{color:var(--mut);font-size:13px;margin:10px 0 0}
-summary{cursor:pointer;font-weight:600}
-table{width:100%;border-collapse:collapse}
-th{font-size:12.5px;font-weight:600;color:var(--mut);text-align:left;padding:6px 8px;border-bottom:2px solid var(--line)}
-td{padding:9px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-td.n,th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.pn{font-weight:600;text-transform:capitalize}.conta{display:block;color:var(--mut);font:12px ui-monospace,Consolas,monospace;margin-top:2px}
-.buy{display:inline-block;background:var(--acs);color:var(--ac);font-weight:700;border-radius:6px;padding:2px 10px}
-.box{border-radius:12px;padding:12px 16px;margin-bottom:14px}.box.w{background:var(--warn);color:var(--warni)}.box.e{background:var(--err);color:var(--erri)}
-.box h3{margin:0 0 6px;font-size:14px}.box p{margin:6px 0}
-.chip{min-height:34px;padding:4px 10px;margin:2px 4px 2px 0;background:var(--card);color:var(--ink)}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px}
-.cli{border:1px solid var(--line);border-radius:10px;padding:10px 12px}.cli h3{margin:0 0 4px;font-size:14.5px}
-.cli ul{margin:0;padding-left:18px}.mut{color:var(--mut);font-size:13px}
-.vazio{color:var(--mut);padding:18px 0;text-align:center}
-.nav{display:none}
-dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);width:min(520px,92vw);max-height:80vh;overflow:auto;padding:16px}
-dialog::backdrop{background:#0009}.sv{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
-.bar2{display:flex;gap:8px;margin-top:14px}.bar2 button{flex:1}
-#toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;background:var(--ink);color:var(--bg);padding:9px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:opacity .2s;z-index:30;max-width:90vw;text-align:center}#toast.on{opacity:1}
-@media(max-width:900px){
- .cols{display:block}
- textarea{font-size:16px}#novo{height:150px}
- #app:not([data-t=in]) .p-in{display:none}
- #app:not([data-t=buy]) .p-buy{display:none}
- #app:not([data-t=cli]) .p-cli{display:none}
- .nav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);padding:6px 8px calc(6px + env(safe-area-inset-bottom));gap:6px}
- .nav button{flex:1;border:0;min-height:46px;font-weight:600;color:var(--mut);position:relative}
- .nav button[aria-current=true]{background:var(--acs);color:var(--ac)}
- .nav i{position:absolute;top:2px;right:18%;background:#c2410c;color:#fff;border-radius:99px;font:700 11px/1 system-ui;padding:3px 6px;font-style:normal}.nav i:empty{display:none}
- .t{font-size:16px}
-}
-</style>
-</head>
-<body>
-<header class="top">
-  <div class="brand"><svg class="logo" viewBox="0 0 34 34" aria-hidden="true"><g fill="#fff"><circle cx="9" cy="11" r="2"/><circle cx="9" cy="17" r="2"/><circle cx="9" cy="23" r="2"/><rect x="14" y="9.6" width="13" height="2.8" rx="1.4"/><rect x="14" y="15.6" width="10" height="2.8" rx="1.4"/><rect x="14" y="21.6" width="12" height="2.8" rx="1.4"/></g></svg>
-    <div><div class="t">Pedidos CEASA</div><button id="nome" class="nome" title="Toque para renomear"></button></div></div>
-  <div class="acts"><button id="salvos">Histórico</button><button id="limpar">Nova lista</button></div>
-</header>
-<main id="app" data-t="in">
-  <div id="stats" class="stats"></div>
-  <div class="cols">
-    <section class="p-in">
-      <div class="card">
-        <h2>Novo pedido</h2>
-        <textarea id="novo" spellcheck="false" placeholder="Cole aqui o pedido copiado do WhatsApp"></textarea>
-        <div class="row"><button id="salvar" class="pri">Salvar pedido</button><button id="colar">Colar e salvar</button></div>
-        <p class="hint">Ao salvar, o pedido entra na lista atual e esta caixa fica limpa para o próximo. Tudo continua na mesma lista até você tocar em Nova lista.</p>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>Pedidos CEASA</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="icon-180.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Pedidos" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="theme-color" content="#15402a" />
+    <style>
+      :root {
+        --bg: #eceff1;
+        --card: #fff;
+        --ink: #17212b;
+        --mut: #5f6b76;
+        --line: #dde2e6;
+        --ac: #1f6f43;
+        --acs: #e3f1e9;
+        --warn: #fff4d6;
+        --warni: #7a5200;
+        --err: #fde7e4;
+        --erri: #8a1f11;
+        --hd: #15402a;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #0e1411;
+          --card: #172019;
+          --ink: #e8efe9;
+          --mut: #93a398;
+          --line: #2a362d;
+          --ac: #5fc287;
+          --acs: #1d3a28;
+          --warn: #3d3312;
+          --warni: #f1cf7a;
+          --err: #45201c;
+          --erri: #f5aaa0;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          15px/1.45 "Avenir Next",
+          "Segoe UI",
+          system-ui,
+          sans-serif;
+        -webkit-text-size-adjust: 100%;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+        cursor: pointer;
+        min-height: 40px;
+        padding: 8px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--card);
+      }
+      button:hover {
+        border-color: var(--ac);
+      }
+      button:focus-visible,
+      textarea:focus-visible,
+      summary:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 2px solid var(--ac);
+        outline-offset: 2px;
+      }
+      .top {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        background: var(--hd);
+        color: #fff;
+        padding: calc(10px + env(safe-area-inset-top)) 16px 10px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-width: 0;
+      }
+      .logo {
+        width: 34px;
+        height: 34px;
+        flex: none;
+        border-radius: 9px;
+        background: #fff1;
+      }
+      .t {
+        font-weight: 700;
+        font-size: 17px;
+        letter-spacing: 0.2px;
+      }
+      .nome {
+        all: unset;
+        cursor: pointer;
+        display: block;
+        font-size: 12.5px;
+        color: #cfe6d8;
+        border-bottom: 1px dotted #cfe6d8;
+        max-width: 46vw;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .acts {
+        display: flex;
+        gap: 8px;
+      }
+      .acts button {
+        background: #ffffff1a;
+        border-color: #ffffff33;
+        color: #fff;
+        min-height: 38px;
+      }
+      main {
+        max-width: 1240px;
+        margin: 0 auto;
+        padding: 14px 16px 90px;
+      }
+      .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      .stats span {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 5px 14px;
+        font-size: 14px;
+        color: var(--mut);
+      }
+      .stats b {
+        color: var(--ink);
+        font-variant-numeric: tabular-nums;
+        font-size: 16px;
+      }
+      .stats .w {
+        background: var(--warn);
+        border-color: transparent;
+        color: var(--warni);
+      }
+      .stats .w b {
+        color: var(--warni);
+      }
+      .cols {
+        display: grid;
+        grid-template-columns: minmax(300px, 380px) 1fr;
+        gap: 16px;
+        align-items: start;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 14px;
+      }
+      .card h2 {
+        font-size: 16px;
+        margin: 0 0 10px;
+      }
+      .hd {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+      .hd h2 {
+        margin: 0;
+      }
+      textarea {
+        display: block;
+        width: 100%;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          14px/1.4 ui-monospace,
+          Consolas,
+          monospace;
+        resize: vertical;
+      }
+      input,
+      select {
+        font: inherit;
+        min-height: 40px;
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--bg);
+        color: var(--ink);
+        min-width: 0;
+      }
+      #novo {
+        height: 170px;
+      }
+      #txt {
+        height: 240px;
+        margin-top: 10px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .row button {
+        flex: 1;
+      }
+      .add {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .add input {
+        flex: 1 1 140px;
+      }
+      .sub {
+        font-size: 14.5px;
+        margin: 14px 0 4px;
+      }
+      .pri {
+        background: var(--ac);
+        border-color: var(--ac);
+        color: #fff;
+        font-weight: 700;
+      }
+      @media (prefers-color-scheme: dark) {
+        .pri {
+          color: #0e1411;
+        }
+      }
+      .hint {
+        color: var(--mut);
+        font-size: 13px;
+        margin: 10px 0 0;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--mut);
+        text-align: left;
+        padding: 6px 8px;
+        border-bottom: 2px solid var(--line);
+      }
+      td {
+        padding: 9px 8px;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+      td.n,
+      th.n {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+      }
+      .pn {
+        font-weight: 600;
+        text-transform: capitalize;
+      }
+      .conta {
+        display: block;
+        color: var(--mut);
+        font:
+          12px ui-monospace,
+          Consolas,
+          monospace;
+        margin-top: 2px;
+      }
+      .buy {
+        display: inline-block;
+        background: var(--acs);
+        color: var(--ac);
+        font-weight: 700;
+        border-radius: 6px;
+        padding: 2px 10px;
+      }
+      .box {
+        border-radius: 12px;
+        padding: 12px 16px;
+        margin-bottom: 14px;
+      }
+      .box.w {
+        background: var(--warn);
+        color: var(--warni);
+      }
+      .box.e {
+        background: var(--err);
+        color: var(--erri);
+      }
+      .box h3 {
+        margin: 0 0 6px;
+        font-size: 14px;
+      }
+      .box p {
+        margin: 6px 0;
+      }
+      .chip {
+        min-height: 34px;
+        padding: 4px 10px;
+        margin: 2px 4px 2px 0;
+        background: var(--card);
+        color: var(--ink);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+        gap: 10px;
+      }
+      .cli {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+      }
+      .cli h3 {
+        margin: 0 0 4px;
+        font-size: 14.5px;
+      }
+      .cli ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+      .mut {
+        color: var(--mut);
+        font-size: 13px;
+      }
+      .vazio {
+        color: var(--mut);
+        padding: 18px 0;
+        text-align: center;
+      }
+      .nav {
+        display: none;
+      }
+      dialog {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: var(--card);
+        color: var(--ink);
+        width: min(520px, 92vw);
+        max-height: 80vh;
+        overflow: auto;
+        padding: 16px;
+      }
+      dialog::backdrop {
+        background: #0009;
+      }
+      .sv {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .bar2 {
+        display: flex;
+        gap: 8px;
+        margin-top: 14px;
+      }
+      .bar2 button {
+        flex: 1;
+      }
+      #toast {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 84px;
+        background: var(--ink);
+        color: var(--bg);
+        padding: 9px 16px;
+        border-radius: 999px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 30;
+        max-width: 90vw;
+        text-align: center;
+      }
+      #toast.on {
+        opacity: 1;
+      }
+      @media (max-width: 900px) {
+        .cols {
+          display: block;
+        }
+        textarea,
+        input,
+        select {
+          font-size: 16px;
+        }
+        #novo {
+          height: 150px;
+        }
+        #app:not([data-t="in"]) .p-in {
+          display: none;
+        }
+        #app:not([data-t="buy"]) .p-buy {
+          display: none;
+        }
+        #app:not([data-t="cli"]) .p-cli {
+          display: none;
+        }
+        #app:not([data-t="med"]) .p-med {
+          display: none;
+        }
+        .nav {
+          display: flex;
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          z-index: 20;
+          background: var(--card);
+          border-top: 1px solid var(--line);
+          padding: 6px 8px calc(6px + env(safe-area-inset-bottom));
+          gap: 6px;
+        }
+        .nav button {
+          flex: 1;
+          border: 0;
+          min-height: 46px;
+          font-weight: 600;
+          color: var(--mut);
+          position: relative;
+          padding: 8px 4px;
+        }
+        .nav button[aria-current="true"] {
+          background: var(--acs);
+          color: var(--ac);
+        }
+        .nav i {
+          position: absolute;
+          top: 2px;
+          right: 12%;
+          background: #c2410c;
+          color: #fff;
+          border-radius: 99px;
+          font: 700 11px/1 system-ui;
+          padding: 3px 6px;
+          font-style: normal;
+        }
+        .nav i:empty {
+          display: none;
+        }
+        .t {
+          font-size: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 34 34" aria-hidden="true">
+          <g fill="#fff">
+            <circle cx="9" cy="11" r="2" />
+            <circle cx="9" cy="17" r="2" />
+            <circle cx="9" cy="23" r="2" />
+            <rect x="14" y="9.6" width="13" height="2.8" rx="1.4" />
+            <rect x="14" y="15.6" width="10" height="2.8" rx="1.4" />
+            <rect x="14" y="21.6" width="12" height="2.8" rx="1.4" />
+          </g>
+        </svg>
+        <div>
+          <div class="t">Pedidos CEASA</div>
+          <button id="nome" class="nome" title="Toque para renomear"></button>
+        </div>
       </div>
-      <details class="card" open><summary>Pedidos da lista atual (editar)</summary>
-        <textarea id="txt" spellcheck="false" placeholder="Os pedidos salvos aparecem aqui. Você pode corrigir o texto."></textarea>
-      </details>
-    </section>
-    <section>
-      <div class="p-buy"><div id="pend"></div>
-        <div class="card"><div class="hd"><h2>Lista de compra</h2><button id="copiar">Copiar</button></div><div id="buy"></div></div>
+      <div class="acts">
+        <button id="salvos">Histórico</button
+        ><button id="limpar">Nova lista</button>
       </div>
-      <div class="p-cli card"><h2>Por cliente</h2><div id="cli" class="grid"></div></div>
-    </section>
-  </div>
-</main>
-<nav class="nav"><button data-t="in" aria-current="true">Pedidos</button><button data-t="buy">Compra<i id="bP"></i></button><button data-t="cli">Clientes</button></nav>
-<dialog id="dlg"><h2 style="margin:0 0 6px;font-size:17px">Histórico de listas</h2><div id="lista-salvos"></div>
-  <div class="bar2"><button id="baixar">Baixar lista atual (.txt)</button><button id="fechar">Fechar</button></div></dialog>
-<div id="toast"></div>
+    </header>
+    <main id="app" data-t="in">
+      <div id="stats" class="stats"></div>
+      <div class="cols">
+        <section class="p-in">
+          <div class="card">
+            <h2>Novo pedido</h2>
+            <textarea
+              id="novo"
+              spellcheck="false"
+              placeholder="Cole aqui o pedido copiado do WhatsApp"
+            ></textarea>
+            <div class="row">
+              <button id="salvar" class="pri">Salvar pedido</button
+              ><button id="colar">Colar e salvar</button>
+            </div>
+            <p class="hint">
+              Ao salvar, o pedido entra na lista atual e esta caixa fica limpa
+              para o próximo. Tudo continua na mesma lista até você tocar em
+              Nova lista.
+            </p>
+          </div>
+          <details class="card" open>
+            <summary>Pedidos da lista atual (editar)</summary>
+            <textarea
+              id="txt"
+              spellcheck="false"
+              placeholder="Os pedidos salvos aparecem aqui. Você pode corrigir o texto."
+            ></textarea>
+          </details>
+        </section>
+        <section>
+          <div class="p-buy">
+            <div id="pend"></div>
+            <div class="card">
+              <div class="hd">
+                <h2>Lista de compra</h2>
+                <button id="copiar">Copiar</button>
+              </div>
+              <div id="buy"></div>
+            </div>
+          </div>
+          <div class="p-cli card">
+            <h2>Por cliente</h2>
+            <div id="cli" class="grid"></div>
+          </div>
+          <div class="p-med card">
+            <h2>Apelidos e medidas</h2>
+            <h3 class="sub">Apelidos</h3>
+            <p class="mut">
+              Quando o pedido trouxer o apelido, o app troca pelo nome certo e
+              soma junto.
+            </p>
+            <div id="apl"></div>
+            <div class="add">
+              <input
+                id="apA"
+                placeholder="apelido (ex: breda)"
+                autocapitalize="none"
+              /><input
+                id="apP"
+                placeholder="nome certo (ex: abacate breda)"
+                autocapitalize="none"
+              /><button id="apAdd" class="pri">Adicionar</button>
+            </div>
+            <h3 class="sub">Medida padrão</h3>
+            <p class="mut">
+              Quando o pedido vier sem unidade, o app usa esta. Se o produto não
+              estiver aqui, ele pergunta e guarda sua escolha.
+            </p>
+            <div id="med"></div>
+            <div class="add">
+              <input
+                id="mdP"
+                placeholder="produto (ex: cebola)"
+                autocapitalize="none"
+              /><select id="mdU" aria-label="Unidade"></select
+              ><button id="mdAdd" class="pri">Adicionar</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+    <nav class="nav">
+      <button data-t="in" aria-current="true">Pedidos</button
+      ><button data-t="buy">Compra<i id="bP"></i></button
+      ><button data-t="cli">Clientes</button
+      ><button data-t="med">Medidas</button>
+    </nav>
+    <dialog id="dlg">
+      <h2 style="margin: 0 0 6px; font-size: 17px">Histórico de listas</h2>
+      <div id="lista-salvos"></div>
+      <div class="bar2">
+        <button id="baixar">Baixar lista atual (.txt)</button
+        ><button id="fechar">Fechar</button>
+      </div>
+    </dialog>
+    <div id="toast"></div>
 
-<script>
-// ---------- regras (edite aqui) ----------
-const REND={'abobora menina':27,'abobora verde':26,'chuchu':28,'beterraba':27,'pimentao verde':31,'cenoura':35,'berinjela':26,'pepino japones':34,'pepino rubi':25,'maxixe':39,'cebola roxa':28,'quiabo':45};
-const UN={cx:'caixa',caixa:'caixa',bj:'bandeja',bdj:'bandeja',band:'bandeja',bandeja:'bandeja',sc:'saco',saco:'saco',moi:'molho',molho:'molho',kg:'kg',quilo:'kg'};
-const AB={caixa:'cx',bandeja:'bj',saco:'sc',molho:'moi',kg:'kg'};
-const PAL={kabotia:'abóbora cabotiá',cabutia:'abóbora cabotiá',cabotia:'abóbora cabotiá',abobora:'abóbora',cara:'cará',medio:'médio',hortela:'hortelã',brocolis:'brócolis',pimentao:'pimentão',japones:'japonês'};
-// ---------- leitura ----------
-const HEADER=/^\[[^\]]*\]\s*(?:\+?[\d\s\-()]{6,})?\s*:?\s*(.*)$/;
-const QTD=/^(\d+\s*\/\s*\d+|\d+(?:[.,]\d+)?|mei[oa]?)\s+(.+)$/i;
-const OBS=/(placa|nota|boleto|(?:^|\s)[aà]s?\s+\d|\d{1,2}:\d{2}|\brua\b|avenida|quadra|endere)/i;
-const SKIP=/^(encaminhada|\d{1,2}:\d{2})$/i;
-const get=(o,k)=>Object.hasOwn(o,k)?o[k]:undefined;
-const sem=s=>s.normalize('NFD').replace(/\p{M}/gu,'').toLowerCase();
-const fmt=n=>n.toLocaleString('pt-BR',{maximumFractionDigits:2});
-const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const qtd=s=>{s=s.trim().toLowerCase();if(s.includes('/')){const[a,b]=s.split('/');return +a/+b}if(s.startsWith('mei'))return .5;return parseFloat(s.replace(',','.'))};
-const nome=tk=>{const s=tk.map(w=>get(PAL,sem(w))||w.toLowerCase()).join(' ').replace('abóbora abóbora','abóbora');return s==='pimentão'?'pimentão verde':s};
-const rend=p=>{const n=sem(p);for(const k in REND)if(n===k||n.startsWith(k+' '))return REND[k];return null};
-const padrao=p=>{const n=sem(p);
-  if(/^(abacate|abobora cabotia|repolho)/.test(n))return'caixa';
-  if(/^(couve|brocolis|tomate cereja)/.test(n)||rend(p))return'bandeja';return null};
-const txt=it=>`${fmt(it.qtd)} ${it.un} ${it.produto}${it.obs?` (${it.obs})`:''}`;
+    <script>
+      // ---------- regras (edite aqui) ----------
+      // Tudo que você pode querer mudar fica nesta parte do código.
+      // Escreva os nomes SEM acento e em minúsculo nas tabelas (o app ignora acento e maiúscula ao ler o pedido).
+      //
+      // REND = produtos que vêm em CAIXA com N BANDEJAS dentro.
+      //   Formato:  'nome do produto': bandejas por caixa
+      //   Para adicionar: ponha uma vírgula no fim da linha e escreva o novo, ex.:  'jilo':30
+      const REND = {
+        "abobora menina": 27,
+        "abobora verde": 26,
+        chuchu: 28,
+        beterraba: 27,
+        "pimentao verde": 31,
+        cenoura: 35,
+        berinjela: 26,
+        "pepino japones": 34,
+        "pepino rubi": 25,
+        maxixe: 39,
+        "cebola roxa": 28,
+        quiabo: 45,
+      };
+      // UN = como cada unidade pode vir escrita no pedido (apelido da unidade -> nome certo).
+      //   Para aceitar outra abreviação, ex.: cxa:'caixa'
+      const UN = {
+        un: "unidade",
+        und: "unidade",
+        unid: "unidade",
+        unidade: "unidade",
+        unidades: "unidade",
+        caixas: "caixa",
+        bandejas: "bandeja",
+        sacos: "saco",
+        molhos: "molho",
+        cx: "caixa",
+        caixa: "caixa",
+        bj: "bandeja",
+        bdj: "bandeja",
+        band: "bandeja",
+        bandeja: "bandeja",
+        sc: "saco",
+        saco: "saco",
+        moi: "molho",
+        molho: "molho",
+        kg: "kg",
+        quilo: "kg",
+      };
+      // AB = abreviação mostrada na tela para cada unidade.
+      const AB = {
+        unidade: "un",
+        caixa: "cx",
+        bandeja: "bj",
+        saco: "sc",
+        molho: "moi",
+        kg: "kg",
+      };
+      // PAL = correção de nomes: palavra escrita sem acento ou errada -> como deve aparecer.
+      const PAL = {
+        kabotia: "abóbora cabotiá",
+        cabutia: "abóbora cabotiá",
+        cabotia: "abóbora cabotiá",
+        abobora: "abóbora",
+        cara: "cará",
+        medio: "médio",
+        hortela: "hortelã",
+        brocolis: "brócolis",
+        pimentao: "pimentão",
+        japones: "japonês",
+      };
+      // REND_UN = produtos vendidos por UNIDADE, que também podem vir em CAIXA com N unidades dentro.
+      //   Formato:  'nome do produto': unidades por caixa
+      //   Se o pedido não disser a unidade, o app entende UNIDADE (ex.: "10 acelga" = 10 un).
+      //   Se disser caixa, converte (ex.: "2 cx acelga" = 16 un) e a lista de compra sugere quantas caixas comprar.
+      //   Para trocar a quantidade por caixa, mude o número. Para outro produto, ponha vírgula e uma nova linha.
+      const REND_UN = { acelga: 8 };
+      // apelidos que já vêm prontos (depois dá para apagar ou mudar na aba Medidas)
+      // Formato:  'apelido sem acento': {a:'apelido',p:'nome certo'}
+      const APE0 = {
+        cereja: { a: "cereja", p: "tomate cereja" },
+        breda: { a: "breda", p: "abacate breda" },
+        "acelga grande": { a: "acelga grande", p: "acelga" },
+      };
+      let APE = {},
+        UNI = {},
+        DIF = []; // apelidos, medidas aprendidas, pares "não são o mesmo produto"
+      // ---------- leitura ----------
+      const HEADER = /^\[[^\]]*\]\s*(?:\+?[\d\s\-()]{6,})?\s*:?\s*(.*)$/;
+      const QTD =
+        /^(\d+\s+e\s+mei[oa]|\d+\s*\/\s*\d+|\d+(?:[.,]\d+)?|mei[oa]?|metade|½)\s+(.+)$/i;
+      const OBS =
+        /(placa|nota|boleto|(?:^|\s)[aà]s?\s+\d|\d{1,2}:\d{2}|\brua\b|avenida|quadra|endere)/i;
+      const SKIP = /^(encaminhada|\d{1,2}:\d{2})$/i;
+      const get = (o, k) => (Object.hasOwn(o, k) ? o[k] : undefined);
+      const sem = (s) =>
+        s
+          .normalize("NFD")
+          .replace(/\p{M}/gu, "")
+          .toLowerCase()
+          .replace(/\s+/g, " ")
+          .trim();
+      const fmt = (n) =>
+        n.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+      const esc = (s) =>
+        String(s).replace(
+          /[&<>"]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+        );
+      const qtd = (s) => {
+        s = s.trim().toLowerCase();
+        const e = s.match(/^(\d+)\s+e\s+mei/);
+        if (e) return +e[1] + 0.5;
+        if (s.includes("/")) {
+          const [a, b] = s.split("/");
+          return +a / +b;
+        }
+        if (s.startsWith("mei") || s === "metade" || s === "½") return 0.5;
+        return parseFloat(s.replace(",", "."));
+      };
+      const nome = (tk) => {
+        const s = tk
+            .map((w) => get(PAL, sem(w)) || w.toLowerCase())
+            .join(" ")
+            .replace("abóbora abóbora", "abóbora"),
+          r = s === "pimentão" ? "pimentão verde" : s,
+          a = get(APE, sem(r));
+        return a ? a.p : r;
+      };
+      // rend(p) = quantos itens vêm numa caixa do produto (busca em REND e em REND_UN); null se não estiver na tabela.
+      const rend = (p) => {
+        const n = sem(p);
+        for (const k in REND)
+          if (n === k || n.startsWith(k + " ")) return REND[k];
+        for (const k in REND_UN)
+          if (n === k || n.startsWith(k + " ")) return REND_UN[k];
+        return null;
+      };
+      // baseTab(p) = o que vem DENTRO da caixa: 'unidade' para os produtos de REND_UN, 'bandeja' para os de REND.
+      const baseTab = (p) => {
+        const n = sem(p);
+        for (const k in REND_UN)
+          if (n === k || n.startsWith(k + " ")) return "unidade";
+        return "bandeja";
+      };
+      // padrao(p) = unidade que o app assume quando o pedido NÃO diz a unidade.
+      //   Para mudar: edite as listas entre parênteses (separe os nomes com |, sem acento).
+      const padrao = (p) => {
+        const n = sem(p);
+        if (rend(p) && baseTab(p) === "unidade") return "unidade"; // produtos de REND_UN (ex.: acelga) -> unidade
+        if (/^(abacate|abobora cabotia|repolho)/.test(n)) return "caixa"; // padrão caixa
+        if (/^(couve|brocolis|tomate cereja)/.test(n) || rend(p))
+          return "bandeja";
+        return null;
+      }; // padrão bandeja (inclui os de REND)
+      const txt = (it) =>
+        `${fmt(it.qtd)} ${it.un} ${it.produto}${it.obs ? ` (${it.obs})` : ""}`;
 
-function item(c,l,idx,duv){
-  const m=l.match(QTD),q=qtd(m[1]),ob=[];
-  let tk=m[2].trim().split(/\s+/).filter(w=>{if(sem(w).startsWith('reposic')){ob.push('reposição');return false}return true});
-  let un=null;
-  if(tk.length>1&&get(UN,sem(tk[0])))un=get(UN,sem(tk.shift()));
-  else if(tk.length>1&&get(UN,sem(tk[tk.length-1])))un=get(UN,sem(tk.pop()));
-  const prod=nome(tk),pad=padrao(prod);let av=null;
-  if(!un){
-    if(!pad){duv.push({cliente:c.nome,linha:l,idx,motivo:'unidade faltando',falta:true});return}
-    un=pad;
-  }else if(pad&&pad!==un&&!(un==='kg'&&sem(prod).startsWith('tomate cereja'))&&!(un==='caixa'&&rend(prod)))av=`unidade diferente da regra (padrão: ${pad})`;
-  c.itens.push({produto:prod,qtd:q,un,obs:ob.join(', '),av});
-}
+      function item(c, l, idx, duv) {
+        const m = l.match(QTD),
+          q = qtd(m[1]),
+          ob = [];
+        let tk = m[2]
+          .trim()
+          .split(/\s+/)
+          .filter((w) => {
+            const x = sem(w);
+            if (x.startsWith("reposic")) {
+              ob.push("reposição");
+              return false;
+            }
+            if (x === "agranel" || x === "granel") {
+              ob.push("a granel");
+              return false;
+            }
+            return true;
+          });
+        // "1 acelga cx 8 unidade" = 1 CAIXA com 8 unidades. O "8 unidade" é só informação (a caixa vale o que está em REND/REND_UN),
+        // então sai do nome do produto e a unidade do pedido continua sendo a caixa.
+        let cxN = null;
+        for (let j = 1; j < tk.length - 1; j++)
+          if (
+            /^\d+$/.test(tk[j]) &&
+            get(UN, sem(tk[j + 1])) === "unidade" &&
+            tk.slice(0, j).some((w) => get(UN, sem(w)) === "caixa")
+          ) {
+            cxN = +tk[j];
+            tk.splice(j, 2);
+            break;
+          }
+        let un = null;
+        if (tk.length > 1 && get(UN, sem(tk[0]))) un = get(UN, sem(tk.shift()));
+        else if (tk.length > 1 && get(UN, sem(tk[tk.length - 1])))
+          un = get(UN, sem(tk.pop()));
+        else {
+          const j = tk.findIndex((w) => get(UN, sem(w)));
+          if (tk.length > 1 && j > 0) un = get(UN, sem(tk.splice(j, 1)[0]));
+        }
+        const prod = nome(tk),
+          ap = get(UNI, sem(prod)),
+          pad = ap ? ap.u : padrao(prod);
+        let av = null;
+        if (!un) {
+          if (!pad) {
+            duv.push({
+              cliente: c.nome,
+              linha: l,
+              idx,
+              motivo: "unidade faltando",
+              falta: true,
+              produto: prod,
+            });
+            return;
+          }
+          un = pad;
+        } else if (
+          !ap &&
+          pad &&
+          pad !== un &&
+          !(un === "kg" && sem(prod).startsWith("tomate cereja")) &&
+          !(un === "caixa" && rend(prod))
+        )
+          av = `unidade diferente da regra (padrão: ${pad})`;
+        if (cxN) {
+          const r = rend(prod); // confere o número escrito no pedido com a tabela
+          if (r && cxN !== r)
+            av = av || `caixa com ${cxN} un no pedido, mas a tabela diz ${r}`;
+          else if (!r) ob.push(`caixa com ${cxN} un`);
+        }
+        c.itens.push({ produto: prod, qtd: q, un, obs: ob.join(", "), av });
+      }
 
-function parse(text){
-  const ls=text.split(/\r?\n/),cl=new Map(),duv=[];let at=null;
-  const nextItem=i=>{for(let j=i+1;j<ls.length;j++){let n=ls[j].replace(/\u200e/g,'').trim();if(!n)continue;if(HEADER.test(n))return false;n=n.replace(/\*/g,'').trim();if(SKIP.test(n))continue;return QTD.test(n)}return false};
-  ls.forEach((raw,i)=>{
-    let l=raw.replace(/\u200e/g,'').trim();const h=l.match(HEADER);
-    if(h){at=null;l=h[1].trim()}
-    l=l.replace(/\*/g,'').trim();
-    if(!l||SKIP.test(l))return;
-    if(QTD.test(l)){
-      if(!at){duv.push({cliente:'(sem cliente)',linha:l,idx:i,motivo:'item sem nome de cliente'});return}
-      item(at,l,i,duv);
-    }else if(at&&OBS.test(l))at.obs.push(l);
-    else if(nextItem(i)){const k=sem(l).trim();if(!cl.has(k))cl.set(k,{nome:l,itens:[],obs:[]});at=cl.get(k)}
-    else if(at){if(at.itens.length){const u=at.itens[at.itens.length-1];u.obs=u.obs?u.obs+', '+l:l}else at.obs.push(l)}
-    else duv.push({cliente:'(sem cliente)',linha:l,idx:i,motivo:'linha não entendida'});
-  });
-  return{cl,duv};
-}
+      function parse(text) {
+        const ls = text.split(/\r?\n/),
+          cl = new Map(),
+          duv = [];
+        let at = null;
+        const nextItem = (i) => {
+          for (let j = i + 1; j < ls.length; j++) {
+            let n = ls[j].replace(/\u200e/g, "").trim();
+            if (!n) continue;
+            if (HEADER.test(n)) return false;
+            n = n.replace(/\*/g, "").trim();
+            if (SKIP.test(n)) continue;
+            return QTD.test(n);
+          }
+          return false;
+        };
+        ls.forEach((raw, i) => {
+          let l = raw.replace(/\u200e/g, "").trim();
+          const h = l.match(HEADER);
+          if (h) {
+            at = null;
+            l = h[1].trim();
+          }
+          l = l.replace(/\*/g, "").trim();
+          if (!l || SKIP.test(l)) return;
+          if (QTD.test(l)) {
+            if (!at) {
+              duv.push({
+                cliente: "(sem cliente)",
+                linha: l,
+                idx: i,
+                motivo: "item sem nome de cliente",
+              });
+              return;
+            }
+            item(at, l, i, duv);
+          } else if (at && OBS.test(l)) at.obs.push(l);
+          else if (nextItem(i)) {
+            const k = sem(l).trim();
+            if (!cl.has(k)) cl.set(k, { nome: l, itens: [], obs: [] });
+            at = cl.get(k);
+          } else if (at) {
+            if (at.itens.length) {
+              const u = at.itens[at.itens.length - 1];
+              u.obs = u.obs ? u.obs + ", " + l : l;
+            } else at.obs.push(l);
+          } else
+            duv.push({
+              cliente: "(sem cliente)",
+              linha: l,
+              idx: i,
+              motivo: "linha não entendida",
+            });
+        });
+        return { cl, duv };
+      }
 
-// ---------- lista ----------
-function lista(cl){
-  const g=new Map(),pend=[];
-  for(const c of cl.values())for(const it of c.itens){
-    if(it.av){pend.push({c:c.nome,t:txt(it),m:it.av});continue}
-    const tab=rend(it.produto)&&(it.un==='bandeja'||it.un==='caixa'),un=tab?'bandeja':it.un,k=sem(it.produto)+'|'+un;
-    if(!g.has(k))g.set(k,[]);g.get(k).push(it);
-  }
-  const rows=[...g.entries()].sort((a,b)=>a[0]<b[0]?-1:1).map(([k,its])=>{
-    const p=its[0].produto,r=rend(p),tab=r&&k.endsWith('|bandeja');let total=0;
-    const partes=its.map(it=>{let v=it.qtd,s;
-      if(tab&&it.un==='caixa'){v=it.qtd*r;s=`(${fmt(it.qtd)} cx×${r}=${fmt(v)})`}else s=fmt(v);
-      total+=v;return s});
-    const un=tab?'bandeja':its[0].un,conta=`${partes.join('+')} = ${fmt(total)} ${AB[un]}`;
-    if(!tab)return{p,un,total,conta,tab:false};
-    const sug=Math.ceil(total/r-1e-9);
-    return{p,un,total,conta,tab:true,ex:Math.round(total/r*100)/100,sug,sobra:sug*r-total};
-  });
-  return{rows,pend};
-}
+      // ---------- lista ----------
+      function lista(cl) {
+        const g = new Map(),
+          pend = [];
+        for (const c of cl.values())
+          for (const it of c.itens) {
+            if (it.av) {
+              pend.push({ c: c.nome, t: txt(it), m: it.av });
+              continue;
+            }
+            const b = baseTab(it.produto),
+              tab = rend(it.produto) && (it.un === b || it.un === "caixa"),
+              un = tab ? b : it.un,
+              k = sem(it.produto) + "|" + un;
+            if (!g.has(k)) g.set(k, []);
+            g.get(k).push(it);
+          }
+        const rows = [...g.entries()]
+          .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+          .map(([k, its]) => {
+            const p = its[0].produto,
+              r = rend(p),
+              tab = r && k.endsWith("|" + baseTab(p));
+            let total = 0;
+            const partes = its.map((it) => {
+              let v = it.qtd,
+                s;
+              if (tab && it.un === "caixa") {
+                v = it.qtd * r;
+                s = `(${fmt(it.qtd)} cx×${r}=${fmt(v)})`;
+              } else s = fmt(v);
+              total += v;
+              return s;
+            });
+            const un = tab ? baseTab(p) : its[0].un,
+              conta = `${partes.join("+")} = ${fmt(total)} ${AB[un]}`;
+            if (!tab) return { p, un, total, conta, tab: false };
+            const sug = Math.ceil(total / r - 1e-9);
+            return {
+              p,
+              un,
+              total,
+              conta,
+              tab: true,
+              ex: Math.round((total / r) * 100) / 100,
+              sug,
+              sobra: sug * r - total,
+            };
+          });
+        return { rows, pend };
+      }
 
-function nomesParecidos(cl){
-  const ks=[...cl.entries()],av=[];
-  for(let i=0;i<ks.length;i++)for(let j=i+1;j<ks.length;j++){
-    const a=sem(ks[i][1].nome).trim(),b=sem(ks[j][1].nome).trim();
-    if(a.includes(b)||b.includes(a))av.push(`Nomes parecidos: ${ks[i][1].nome} e ${ks[j][1].nome} (tratados como clientes diferentes)`);
-  }
-  return av;
-}
+      function nomesParecidos(cl) {
+        const ks = [...cl.entries()],
+          av = [];
+        for (let i = 0; i < ks.length; i++)
+          for (let j = i + 1; j < ks.length; j++) {
+            const a = sem(ks[i][1].nome).trim(),
+              b = sem(ks[j][1].nome).trim();
+            if (a.includes(b) || b.includes(a))
+              av.push(
+                `Nomes parecidos: ${ks[i][1].nome} e ${ks[j][1].nome} (tratados como clientes diferentes)`,
+              );
+          }
+        return av;
+      }
 
-// ---------- tela ----------
-const $=id=>document.getElementById(id);
-const K={a:'pedidos-ceasa',c:'pedidos-ceasa-caixa',n:'pedidos-ceasa-nome',h:'pedidos-ceasa-salvos'};
-const lget=k=>{try{return localStorage.getItem(k)}catch(e){return null}};
-const lset=(k,v)=>{try{localStorage.setItem(k,v);return true}catch(e){return false}};
-const hist=()=>{try{return JSON.parse(lget(K.h)||'[]')}catch(e){return[]}};
-const novoNome=()=>{const d=new Date();return'Lista '+d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})};
-const linhas=v=>v===''?[]:v.split(/\r?\n/);
-const lin=()=>linhas($('txt').value).concat(linhas($('novo').value));
-let nomeLista=lget(K.n)||novoNome(),ultima=null;
+      // produtos em que um nome está dentro do outro (ex: "cereja" e "tomate cereja")
+      function parecidos(cl) {
+        const ps = new Map(),
+          r = [];
+        for (const c of cl.values())
+          for (const it of c.itens) ps.set(sem(it.produto), it.produto);
+        for (const a of ps.keys())
+          for (const b of ps.keys()) {
+            if (a === b || DIF.includes(a + "|" + b)) continue;
+            const wa = a.split(" "),
+              wb = b.split(" ");
+            if (wa.length < wb.length && wa.every((w) => wb.includes(w)))
+              r.push([ps.get(a), ps.get(b)]);
+          }
+        return r;
+      }
 
-function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('on'),2200)}
-function aba(x){$('app').dataset.t=x;document.querySelectorAll('.nav button').forEach(b=>b.toggleAttribute('aria-current',b.dataset.t===x));window.scrollTo(0,0)}
-document.querySelectorAll('.nav button').forEach(b=>b.onclick=()=>aba(b.dataset.t));
+      // ---------- tela ----------
+      const $ = (id) => document.getElementById(id);
+      const K = {
+        a: "pedidos-ceasa",
+        c: "pedidos-ceasa-caixa",
+        n: "pedidos-ceasa-nome",
+        h: "pedidos-ceasa-salvos",
+        ap: "pedidos-ceasa-apelidos",
+        un: "pedidos-ceasa-unidades",
+        df: "pedidos-ceasa-diferentes",
+      };
+      const lget = (k) => {
+        try {
+          return localStorage.getItem(k);
+        } catch (e) {
+          return null;
+        }
+      };
+      const lset = (k, v) => {
+        try {
+          localStorage.setItem(k, v);
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      const lj = (k, d) => {
+        try {
+          const v = JSON.parse(lget(k));
+          return v && typeof v === "object" ? v : d;
+        } catch (e) {
+          return d;
+        }
+      };
+      const hist = () => {
+        try {
+          return JSON.parse(lget(K.h) || "[]");
+        } catch (e) {
+          return [];
+        }
+      };
+      const novoNome = () => {
+        const d = new Date();
+        return (
+          "Lista " +
+          d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) +
+          " " +
+          d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })
+        );
+      };
+      const linhas = (v) => (v === "" ? [] : v.split(/\r?\n/));
+      const lin = () => linhas($("txt").value).concat(linhas($("novo").value));
+      let nomeLista = lget(K.n) || novoNome(),
+        ultima = null;
+      APE = lj(K.ap, { ...APE0 });
+      UNI = lj(K.un, {});
+      DIF = lj(K.df, []);
+      if (!Array.isArray(DIF)) DIF = [];
+      const salvarMed = () => {
+        lset(K.ap, JSON.stringify(APE));
+        lset(K.un, JSON.stringify(UNI));
+        lset(K.df, JSON.stringify(DIF));
+      };
+      // apelido novo "acelga grande" -> "acelga": entra uma vez só para quem já tinha apelidos salvos (depois dá para apagar na aba Medidas)
+      if (lget("pedidos-ceasa-seed") !== "2") {
+        APE = { "acelga grande": APE0["acelga grande"], ...APE };
+        lset("pedidos-ceasa-seed", "2");
+        salvarMed();
+      }
 
-function render(){
-  const a=$('txt').value,n=$('novo').value;
-  lset(K.a,a);lset(K.c,n);lset(K.n,nomeLista);$('nome').textContent=nomeLista;
-  const{cl,duv}=parse(lin().join('\n')),L=lista(cl);ultima=L;
-  const caixas=L.rows.reduce((s,r)=>s+(r.tab?r.sug:0),0),pend=duv.length+L.pend.length,av=nomesParecidos(cl);
-  $('stats').innerHTML=`<span><b>${cl.size}</b> clientes</span><span><b>${L.rows.length}</b> produtos</span><span><b>${caixas}</b> caixas da tabela</span>`+(pend?`<span class="w"><b>${pend}</b> pendências</span>`:'');
-  $('bP').textContent=pend+av.length||'';
-  let h='';
-  if(duv.length)h+='<div class="box e"><h3>Dúvidas para resolver ('+duv.length+')</h3>'+duv.map(d=>`<p><b>${esc(d.cliente)}</b>: "${esc(d.linha)}" — ${esc(d.motivo)}`+
-    (d.falta?'<br>'+Object.keys(AB).map(u=>`<button class="chip" data-i="${d.idx}" data-u="${AB[u]}">${u}</button>`).join(''):'')+'</p>').join('')+'</div>';
-  if(L.pend.length)h+='<div class="box w"><h3>Pendentes de confirmação (não entram no total)</h3>'+L.pend.map(p=>`<p><b>${esc(p.c)}</b>: ${esc(p.t)}<br><span class="mut" style="color:inherit">${esc(p.m)}</span></p>`).join('')+'</div>';
-  if(av.length)h+='<div class="box w">'+av.map(x=>`<p>${esc(x)}</p>`).join('')+'</div>';
-  $('pend').innerHTML=h;
-  $('buy').innerHTML=L.rows.length?'<table><thead><tr><th>Produto</th><th class="n">Total</th><th class="n">Comprar</th><th class="n">Sobra</th></tr></thead><tbody>'+
-    L.rows.map(r=>`<tr><td><span class="pn">${esc(r.p)}</span><span class="conta">${esc(r.conta)}${r.tab?' · '+fmt(r.ex)+' cx exatas':''}</span></td><td class="n">${fmt(r.total)} ${AB[r.un]}</td><td class="n">${r.tab?`<span class="buy">${r.sug} cx</span>`:'—'}</td><td class="n">${r.tab?fmt(r.sobra)+' bj':'—'}</td></tr>`).join('')+'</tbody></table>'
-    :'<p class="vazio">Salve o primeiro pedido para montar a lista de compra.</p>';
-  $('cli').innerHTML=cl.size?[...cl.values()].map(c=>{
-    const soma=new Map();
-    for(const it of c.itens){const k=sem(it.produto)+'|'+it.un+'|'+!!it.av;const x=soma.get(k)||{...it,qtd:0,obs:new Set()};x.qtd+=it.qtd;if(it.obs)x.obs.add(it.obs);soma.set(k,x)}
-    return`<div class="cli"><h3>${esc(c.nome)}</h3><ul>`+[...soma.values()].map(x=>`<li>${esc(txt({...x,obs:''}))}${x.av?' ⚠':''}${x.obs.size?` <span class="mut">(${esc([...x.obs].join(', '))})</span>`:''}</li>`).join('')+'</ul>'+c.obs.map(o=>`<div class="mut">${esc(o)}</div>`).join('')+'</div>';
-  }).join(''):'<p class="vazio">Nenhum cliente ainda.</p>';
-}
+      function toast(m) {
+        const t = $("toast");
+        t.textContent = m;
+        t.classList.add("on");
+        clearTimeout(toast.h);
+        toast.h = setTimeout(() => t.classList.remove("on"), 2200);
+      }
+      function aba(x) {
+        $("app").dataset.t = x;
+        document
+          .querySelectorAll(".nav button")
+          .forEach((b) => b.toggleAttribute("aria-current", b.dataset.t === x));
+        window.scrollTo(0, 0);
+      }
+      document
+        .querySelectorAll(".nav button")
+        .forEach((b) => (b.onclick = () => aba(b.dataset.t)));
 
-function adicionar(t){
-  if(!t.trim())return false;
-  const a=$('txt');a.value+=(a.value&&!/\n$/.test(a.value)?'\n':'')+t.replace(/\s+$/,'');a.scrollTop=a.scrollHeight;return true;
-}
-$('txt').addEventListener('input',render);$('novo').addEventListener('input',render);
-$('salvar').onclick=()=>{
-  if(!adicionar($('novo').value)){toast('Cole um pedido primeiro');return}
-  $('novo').value='';render();toast('Pedido salvo na lista');
-};
-$('colar').onclick=()=>{
-  if(!navigator.clipboard||!navigator.clipboard.readText){toast('Cole na caixa pelo teclado e toque em Salvar');return}
-  navigator.clipboard.readText().then(t=>{if(adicionar(t)){render();toast('Pedido salvo na lista')}else toast('Nada copiado')},()=>toast('Cole na caixa pelo teclado e toque em Salvar'));
-};
-$('nome').onclick=()=>{const v=prompt('Nome da lista',nomeLista);if(v&&v.trim()){nomeLista=v.trim();render()}};
+      function render() {
+        const a = $("txt").value,
+          n = $("novo").value;
+        lset(K.a, a);
+        lset(K.c, n);
+        lset(K.n, nomeLista);
+        $("nome").textContent = nomeLista;
+        const { cl, duv } = parse(lin().join("\n")),
+          L = lista(cl);
+        ultima = L;
+        const caixas = L.rows.reduce((s, r) => s + (r.tab ? r.sug : 0), 0),
+          pend = duv.length + L.pend.length,
+          av = nomesParecidos(cl),
+          sug = parecidos(cl);
+        $("stats").innerHTML =
+          `<span><b>${cl.size}</b> clientes</span><span><b>${L.rows.length}</b> produtos</span><span><b>${caixas}</b> caixas da tabela</span>` +
+          (pend ? `<span class="w"><b>${pend}</b> pendências</span>` : "");
+        $("bP").textContent = pend + av.length + sug.length || "";
+        let h = "";
+        if (duv.length)
+          h +=
+            '<div class="box e"><h3>Dúvidas para resolver (' +
+            duv.length +
+            ")</h3>" +
+            duv
+              .map(
+                (d) =>
+                  `<p><b>${esc(d.cliente)}</b>: "${esc(d.linha)}" — ${esc(d.motivo)}` +
+                  (d.falta
+                    ? "<br>" +
+                      Object.keys(AB)
+                        .map(
+                          (u) =>
+                            `<button class="chip" data-i="${d.idx}" data-u="${AB[u]}" data-n="${u}" data-p="${esc(d.produto)}">${u}</button>`,
+                        )
+                        .join("")
+                    : "") +
+                  "</p>",
+              )
+              .join("") +
+            "</div>";
+        if (L.pend.length)
+          h +=
+            '<div class="box w"><h3>Pendentes de confirmação (não entram no total)</h3>' +
+            L.pend
+              .map(
+                (p) =>
+                  `<p><b>${esc(p.c)}</b>: ${esc(p.t)}<br><span class="mut" style="color:inherit">${esc(p.m)}</span></p>`,
+              )
+              .join("") +
+            "</div>";
+        if (av.length)
+          h +=
+            '<div class="box w">' +
+            av.map((x) => `<p>${esc(x)}</p>`).join("") +
+            "</div>";
+        if (sug.length)
+          h +=
+            '<div class="box w"><h3>É o mesmo produto?</h3>' +
+            sug
+              .map(
+                ([x, y]) =>
+                  `<p>“${esc(x)}” e “${esc(y)}” estão separados.<br><button class="chip" data-s="sim" data-ap="${esc(x)}" data-pr="${esc(y)}">Sim, “${esc(x)}” é ${esc(y)}</button><button class="chip" data-s="nao" data-ap="${esc(x)}" data-pr="${esc(y)}">São diferentes</button></p>`,
+              )
+              .join("") +
+            "</div>";
+        $("pend").innerHTML = h;
+        $("buy").innerHTML = L.rows.length
+          ? '<table><thead><tr><th>Produto</th><th class="n">Total</th><th class="n">Comprar</th><th class="n">Sobra</th></tr></thead><tbody>' +
+            L.rows
+              .map(
+                (r) =>
+                  `<tr><td><span class="pn">${esc(r.p)}</span><span class="conta">${esc(r.conta)}${r.tab ? " · " + fmt(r.ex) + " cx exatas" : ""}</span></td><td class="n">${fmt(r.total)} ${AB[r.un]}</td><td class="n">${r.tab ? `<span class="buy">${r.sug} cx</span>` : "—"}</td><td class="n">${r.tab ? fmt(r.sobra) + " " + AB[r.un] : "—"}</td></tr>`,
+              )
+              .join("") +
+            "</tbody></table>"
+          : '<p class="vazio">Salve o primeiro pedido para montar a lista de compra.</p>';
+        $("cli").innerHTML = cl.size
+          ? [...cl.values()]
+              .map((c) => {
+                const soma = new Map();
+                for (const it of c.itens) {
+                  const k = sem(it.produto) + "|" + it.un + "|" + !!it.av;
+                  const x = soma.get(k) || { ...it, qtd: 0, obs: new Set() };
+                  x.qtd += it.qtd;
+                  if (it.obs) x.obs.add(it.obs);
+                  soma.set(k, x);
+                }
+                return (
+                  `<div class="cli"><h3>${esc(c.nome)}</h3><ul>` +
+                  [...soma.values()]
+                    .map(
+                      (x) =>
+                        `<li>${esc(txt({ ...x, obs: "" }))}${x.av ? " ⚠" : ""}${x.obs.size ? ` <span class="mut">(${esc([...x.obs].join(", "))})</span>` : ""}</li>`,
+                    )
+                    .join("") +
+                  "</ul>" +
+                  c.obs
+                    .map((o) => `<div class="mut">${esc(o)}</div>`)
+                    .join("") +
+                  "</div>"
+                );
+              })
+              .join("")
+          : '<p class="vazio">Nenhum cliente ainda.</p>';
+        renderMed();
+      }
 
-function arquivar(){
-  const t=$('txt').value;if(!t.trim())return;
-  const h=hist();h.unshift({id:Date.now(),nome:nomeLista,texto:t});lset(K.h,JSON.stringify(h));
-}
-$('limpar').onclick=()=>{
-  if(!lin().join('').trim()){toast('A lista já está vazia');return}
-  if(!confirm('Começar uma lista nova? A atual vai para o Histórico.'))return;
-  adicionar($('novo').value);arquivar();
-  $('txt').value='';$('novo').value='';nomeLista=novoNome();render();toast('Lista nova criada. A anterior está no Histórico.');
-};
-function listaHist(){
-  const a=hist();
-  $('lista-salvos').innerHTML=a.length?a.map(s=>`<div class="sv"><div><b>${esc(s.nome)}</b><div class="mut">${(s.texto.match(/^\s*\S/gm)||[]).length} linhas</div></div><div><button data-a="abrir" data-id="${s.id}">Abrir</button> <button data-a="del" data-id="${s.id}">Apagar</button></div></div>`).join('')
-    :'<p class="mut">Nenhuma lista anterior ainda. Ao tocar em Nova lista, a atual fica guardada aqui.</p>';
-}
-$('salvos').onclick=()=>{listaHist();$('dlg').showModal()};
-$('fechar').onclick=()=>$('dlg').close();
-$('lista-salvos').addEventListener('click',e=>{
-  const b=e.target.closest('button[data-a]');if(!b)return;
-  const id=+b.dataset.id,sv=hist().find(x=>x.id===id);if(!sv)return;
-  if(b.dataset.a==='abrir'){
-    const tem=lin().join('').trim();
-    if(tem&&!confirm('A lista atual vai para o Histórico e esta será aberta. Continuar?'))return;
-    lset(K.h,JSON.stringify(hist().filter(x=>x.id!==id)));
-    if(tem){adicionar($('novo').value);$('novo').value='';arquivar()}
-    $('txt').value=sv.texto;nomeLista=sv.nome;render();$('dlg').close();toast('Lista aberta');
-  }else if(confirm('Apagar "'+sv.nome+'" de vez? Não tem como desfazer.')){
-    lset(K.h,JSON.stringify(hist().filter(x=>x.id!==id)));listaHist();
-  }
-});
-$('baixar').onclick=()=>{
-  const t=lin().join('\n');if(!t.trim()){toast('Nada para baixar');return}
-  const u=URL.createObjectURL(new Blob([t],{type:'text/plain;charset=utf-8'})),a=document.createElement('a');
-  a.href=u;a.download='pedidos-'+new Date().toISOString().slice(0,10)+'.txt';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),1000);
-};
-$('copiar').onclick=()=>{
-  if(!ultima||!ultima.rows.length){toast('Nada para copiar');return}
-  const t=ultima.rows.map(r=>r.tab?`${r.p}: comprar ${r.sug} cx (${r.conta})`:`${r.p}: ${r.conta}`).join('\n');
-  navigator.clipboard.writeText(t).then(()=>toast('Lista copiada'),()=>prompt('Copie o texto:',t));
-};
-$('pend').addEventListener('click',e=>{
-  const b=e.target.closest('button[data-i]');if(!b)return;
-  const i=+b.dataset.i,la=linhas($('txt').value),lb=linhas($('novo').value);
-  if(i<la.length){la[i]=la[i].replace(/\s+$/,'')+' '+b.dataset.u;$('txt').value=la.join('\n')}
-  else{const j=i-la.length;lb[j]=lb[j].replace(/\s+$/,'')+' '+b.dataset.u;$('novo').value=lb.join('\n')}
-  render();
-});
-$('txt').value=lget(K.a)||'';$('novo').value=lget(K.c)||'';
-render();
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-</script>
-</body>
+      function renderMed() {
+        const ap = Object.entries(APE),
+          un = Object.entries(UNI);
+        $("apl").innerHTML = ap.length
+          ? ap
+              .map(
+                ([k, v]) =>
+                  `<div class="sv"><div><b>${esc(v.a)}</b> → ${esc(v.p)}</div><button data-k="${esc(k)}">Apagar</button></div>`,
+              )
+              .join("")
+          : '<p class="mut">Nenhum apelido ainda.</p>';
+        $("med").innerHTML = un.length
+          ? un
+              .map(
+                ([k, v]) =>
+                  `<div class="sv"><div><b class="pn">${esc(v.n)}</b></div><div><select data-k="${esc(k)}" aria-label="Unidade de ${esc(v.n)}">${Object.keys(
+                    AB,
+                  )
+                    .map(
+                      (u) =>
+                        `<option${u === v.u ? " selected" : ""}>${u}</option>`,
+                    )
+                    .join(
+                      "",
+                    )}</select> <button data-k="${esc(k)}">Apagar</button></div></div>`,
+              )
+              .join("")
+          : '<p class="mut">Nenhuma medida aprendida ainda.</p>';
+      }
+
+      function adicionar(t) {
+        if (!t.trim()) return false;
+        const a = $("txt");
+        a.value +=
+          (a.value && !/\n$/.test(a.value) ? "\n" : "") + t.replace(/\s+$/, "");
+        a.scrollTop = a.scrollHeight;
+        return true;
+      }
+      $("txt").addEventListener("input", render);
+      $("novo").addEventListener("input", render);
+      $("salvar").onclick = () => {
+        if (!adicionar($("novo").value)) {
+          toast("Cole um pedido primeiro");
+          return;
+        }
+        $("novo").value = "";
+        render();
+        toast("Pedido salvo na lista");
+      };
+      $("colar").onclick = () => {
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+          toast("Cole na caixa pelo teclado e toque em Salvar");
+          return;
+        }
+        navigator.clipboard.readText().then(
+          (t) => {
+            if (adicionar(t)) {
+              render();
+              toast("Pedido salvo na lista");
+            } else toast("Nada copiado");
+          },
+          () => toast("Cole na caixa pelo teclado e toque em Salvar"),
+        );
+      };
+      $("nome").onclick = () => {
+        const v = prompt("Nome da lista", nomeLista);
+        if (v && v.trim()) {
+          nomeLista = v.trim();
+          render();
+        }
+      };
+
+      function arquivar() {
+        const t = $("txt").value;
+        if (!t.trim()) return;
+        const h = hist();
+        h.unshift({ id: Date.now(), nome: nomeLista, texto: t });
+        lset(K.h, JSON.stringify(h));
+      }
+      $("limpar").onclick = () => {
+        if (!lin().join("").trim()) {
+          toast("A lista já está vazia");
+          return;
+        }
+        if (!confirm("Começar uma lista nova? A atual vai para o Histórico."))
+          return;
+        adicionar($("novo").value);
+        arquivar();
+        $("txt").value = "";
+        $("novo").value = "";
+        nomeLista = novoNome();
+        render();
+        toast("Lista nova criada. A anterior está no Histórico.");
+      };
+      function listaHist() {
+        const a = hist();
+        $("lista-salvos").innerHTML = a.length
+          ? a
+              .map(
+                (s) =>
+                  `<div class="sv"><div><b>${esc(s.nome)}</b><div class="mut">${(s.texto.match(/^\s*\S/gm) || []).length} linhas</div></div><div><button data-a="abrir" data-id="${s.id}">Abrir</button> <button data-a="del" data-id="${s.id}">Apagar</button></div></div>`,
+              )
+              .join("")
+          : '<p class="mut">Nenhuma lista anterior ainda. Ao tocar em Nova lista, a atual fica guardada aqui.</p>';
+      }
+      $("salvos").onclick = () => {
+        listaHist();
+        $("dlg").showModal();
+      };
+      $("fechar").onclick = () => $("dlg").close();
+      $("lista-salvos").addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-a]");
+        if (!b) return;
+        const id = +b.dataset.id,
+          sv = hist().find((x) => x.id === id);
+        if (!sv) return;
+        if (b.dataset.a === "abrir") {
+          const tem = lin().join("").trim();
+          if (
+            tem &&
+            !confirm(
+              "A lista atual vai para o Histórico e esta será aberta. Continuar?",
+            )
+          )
+            return;
+          lset(K.h, JSON.stringify(hist().filter((x) => x.id !== id)));
+          if (tem) {
+            adicionar($("novo").value);
+            $("novo").value = "";
+            arquivar();
+          }
+          $("txt").value = sv.texto;
+          nomeLista = sv.nome;
+          render();
+          $("dlg").close();
+          toast("Lista aberta");
+        } else if (
+          confirm('Apagar "' + sv.nome + '" de vez? Não tem como desfazer.')
+        ) {
+          lset(K.h, JSON.stringify(hist().filter((x) => x.id !== id)));
+          listaHist();
+        }
+      });
+      $("baixar").onclick = () => {
+        const t = lin().join("\n");
+        if (!t.trim()) {
+          toast("Nada para baixar");
+          return;
+        }
+        const u = URL.createObjectURL(
+            new Blob([t], { type: "text/plain;charset=utf-8" }),
+          ),
+          a = document.createElement("a");
+        a.href = u;
+        a.download =
+          "pedidos-" + new Date().toISOString().slice(0, 10) + ".txt";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(u), 1000);
+      };
+      $("copiar").onclick = () => {
+        if (!ultima || !ultima.rows.length) {
+          toast("Nada para copiar");
+          return;
+        }
+        const t = ultima.rows
+          .map((r) =>
+            r.tab
+              ? `${r.p}: comprar ${r.sug} cx (${r.conta})`
+              : `${r.p}: ${r.conta}`,
+          )
+          .join("\n");
+        navigator.clipboard.writeText(t).then(
+          () => toast("Lista copiada"),
+          () => prompt("Copie o texto:", t),
+        );
+      };
+      $("pend").addEventListener("click", (e) => {
+        const s = e.target.closest("button[data-ap]");
+        if (s) {
+          if (s.dataset.s === "sim") {
+            APE[sem(s.dataset.ap)] = { a: s.dataset.ap, p: s.dataset.pr };
+            toast("Apelido salvo");
+          } else DIF.push(sem(s.dataset.ap) + "|" + sem(s.dataset.pr));
+          salvarMed();
+          render();
+          return;
+        }
+        const b = e.target.closest("button[data-i]");
+        if (!b) return;
+        if (b.dataset.p) {
+          UNI[sem(b.dataset.p)] = { u: b.dataset.n, n: b.dataset.p };
+          salvarMed();
+          toast("Medida guardada: " + b.dataset.p + " = " + b.dataset.n);
+        }
+        const i = +b.dataset.i,
+          la = linhas($("txt").value),
+          lb = linhas($("novo").value);
+        if (i < la.length) {
+          la[i] = la[i].replace(/\s+$/, "") + " " + b.dataset.u;
+          $("txt").value = la.join("\n");
+        } else {
+          const j = i - la.length;
+          lb[j] = lb[j].replace(/\s+$/, "") + " " + b.dataset.u;
+          $("novo").value = lb.join("\n");
+        }
+        render();
+      });
+
+      // ---------- aba Medidas ----------
+      $("mdU").innerHTML = Object.keys(AB)
+        .map((u) => `<option>${u}</option>`)
+        .join("");
+      $("apAdd").onclick = () => {
+        const a = $("apA").value.trim().replace(/\s+/g, " ").toLowerCase(),
+          p = $("apP").value.trim().replace(/\s+/g, " ").toLowerCase();
+        if (!a || !p) {
+          toast("Preencha o apelido e o nome certo");
+          return;
+        }
+        if (sem(a) === sem(p)) {
+          toast("O apelido é igual ao nome certo");
+          return;
+        }
+        APE[sem(a)] = { a, p };
+        salvarMed();
+        $("apA").value = "";
+        $("apP").value = "";
+        render();
+        toast("Apelido salvo");
+      };
+      $("mdAdd").onclick = () => {
+        const p = $("mdP").value.trim().replace(/\s+/g, " ").toLowerCase();
+        if (!p) {
+          toast("Escreva o nome do produto");
+          return;
+        }
+        UNI[sem(p)] = { u: $("mdU").value, n: p };
+        salvarMed();
+        $("mdP").value = "";
+        render();
+        toast("Medida salva");
+      };
+      $("apl").onclick = (e) => {
+        const b = e.target.closest("button[data-k]");
+        if (!b) return;
+        delete APE[b.dataset.k];
+        salvarMed();
+        render();
+      };
+      $("med").onclick = (e) => {
+        const b = e.target.closest("button[data-k]");
+        if (!b) return;
+        delete UNI[b.dataset.k];
+        salvarMed();
+        render();
+      };
+      $("med").onchange = (e) => {
+        const s = e.target.closest("select[data-k]");
+        if (s && UNI[s.dataset.k]) {
+          UNI[s.dataset.k].u = s.value;
+          salvarMed();
+          render();
+        }
+      };
+
+      $("txt").value = lget(K.a) || "";
+      $("novo").value = lget(K.c) || "";
+      render();
+      if ("serviceWorker" in navigator)
+        navigator.serviceWorker.register("sw.js").catch(() => {});
+    </script>
+  </body>
 </html>
