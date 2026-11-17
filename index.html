@@ -1,0 +1,909 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Pedidos CEASA</title>
+    <style>
+      :root {
+        --bg: #f6f7f4;
+        --card: #fff;
+        --ink: #1d2a1f;
+        --mut: #667;
+        --line: #d9ded6;
+        --ac: #1b6b3a;
+        --warn: #fff1c2;
+        --err: #fde0e0;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #141a15;
+          --card: #1c241d;
+          --ink: #e6ece6;
+          --mut: #9aa89b;
+          --line: #334034;
+          --ac: #5fc287;
+          --warn: #4a3f14;
+          --err: #4d2222;
+        }
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font:
+          15px/1.45 system-ui,
+          Segoe UI,
+          Roboto,
+          sans-serif;
+      }
+      .app {
+        display: grid;
+        grid-template-columns: minmax(280px, 380px) 1fr;
+        gap: 16px;
+        padding: 16px;
+        max-width: 1300px;
+        margin: 0 auto;
+      }
+      @media (max-width: 800px) {
+        .app {
+          grid-template-columns: 1fr;
+        }
+      }
+      h1 {
+        font-size: 20px;
+        margin: 0 0 10px;
+      }
+      h2 {
+        font-size: 16px;
+        margin: 18px 0 8px;
+      }
+      h3 {
+        font-size: 14px;
+        margin: 0 0 4px;
+      }
+      textarea {
+        width: 100%;
+        height: 60vh;
+        min-height: 260px;
+        padding: 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--card);
+        color: var(--ink);
+        font:
+          13px/1.4 ui-monospace,
+          Consolas,
+          monospace;
+        resize: vertical;
+      }
+      .side {
+        position: sticky;
+        top: 16px;
+        align-self: start;
+      }
+      button {
+        padding: 7px 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--card);
+        color: var(--ink);
+        font: inherit;
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--ac);
+      }
+      button:focus-visible,
+      textarea:focus-visible {
+        outline: 2px solid var(--ac);
+        outline-offset: 1px;
+      }
+      .row {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+        flex-wrap: wrap;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        background: var(--card);
+      }
+      th,
+      td {
+        border: 1px solid var(--line);
+        padding: 5px 8px;
+        text-align: left;
+        vertical-align: top;
+      }
+      th {
+        font-weight: 600;
+        background: var(--bg);
+      }
+      td.n,
+      th.n {
+        text-align: right;
+      }
+      .conta {
+        font:
+          12px ui-monospace,
+          Consolas,
+          monospace;
+        color: var(--mut);
+      }
+      .box {
+        padding: 8px 12px;
+        border-radius: 6px;
+        margin: 8px 0;
+      }
+      .warn {
+        background: var(--warn);
+      }
+      .err {
+        background: var(--err);
+      }
+      .box p {
+        margin: 4px 0;
+      }
+      .cli {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px 12px;
+        margin: 8px 0;
+      }
+      .cli ul {
+        margin: 4px 0;
+        padding-left: 20px;
+      }
+      .mut {
+        color: var(--mut);
+        font-size: 13px;
+      }
+      .vazio {
+        color: var(--mut);
+        padding: 24px 0;
+      }
+      .wrap {
+        overflow-x: auto;
+      }
+
+      .tabs {
+        display: none;
+      }
+      .bar {
+        display: flex;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-top: 8px;
+      }
+      .bar button {
+        flex: 1 1 auto;
+      }
+      .st {
+        font-size: 13px;
+        font-weight: 400;
+        margin-left: 10px;
+      }
+      .st.ok {
+        color: var(--ac);
+      }
+      .st.nok {
+        color: #b45309;
+      }
+      dialog {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--card);
+        color: var(--ink);
+        width: min(520px, 92vw);
+        max-height: 80vh;
+        overflow: auto;
+        padding: 14px;
+      }
+      dialog::backdrop {
+        background: #0008;
+      }
+      .sv {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .bar2 {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+      #toast {
+        position: fixed;
+        left: 50%;
+        transform: translateX(-50%);
+        bottom: 96px;
+        background: var(--ink);
+        color: var(--bg);
+        padding: 8px 14px;
+        border-radius: 20px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+        z-index: 20;
+      }
+      #toast.on {
+        opacity: 1;
+      }
+      @media (max-width: 800px) {
+        body {
+          padding-bottom: calc(120px + env(safe-area-inset-bottom));
+        }
+        .app {
+          display: block;
+          padding: 8px;
+        }
+        .tabs {
+          display: flex;
+          position: sticky;
+          top: 0;
+          z-index: 5;
+          background: var(--bg);
+          gap: 6px;
+          padding: 8px 0;
+        }
+        .tabs button {
+          flex: 1;
+          font-weight: 600;
+        }
+        .tabs button[aria-pressed="true"] {
+          background: var(--ac);
+          color: var(--bg);
+          border-color: var(--ac);
+        }
+        .app[data-t="in"] #out {
+          display: none;
+        }
+        .app[data-t="out"] .ent {
+          display: none;
+        }
+        .side {
+          position: static;
+        }
+        .bar {
+          position: fixed;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: 0;
+          padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+          background: var(--bg);
+          border-top: 1px solid var(--line);
+          z-index: 6;
+        }
+        button {
+          min-height: 44px;
+          padding: 8px 10px;
+        }
+        textarea {
+          height: 50vh;
+          font-size: 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app" id="app" data-t="in">
+      <div class="tabs">
+        <button id="tIn" aria-pressed="true">Pedidos</button
+        ><button id="tOut" aria-pressed="false">Lista</button>
+      </div>
+      <div class="side">
+        <div class="ent">
+          <h1>Pedidos CEASA<span id="st" class="st"></span></h1>
+          <textarea
+            id="txt"
+            spellcheck="false"
+            placeholder="Cole aqui os pedidos copiados do WhatsApp. A lista aparece na hora."
+          ></textarea>
+          <p class="mut">
+            Funciona sem internet. Toque em Salvar para guardar esta lista.
+          </p>
+        </div>
+        <div class="bar">
+          <button id="colar">Colar</button><button id="salvar">Salvar</button
+          ><button id="salvos">Salvos</button
+          ><button id="copiar">Copiar lista</button
+          ><button id="limpar">Limpar</button>
+        </div>
+      </div>
+      <div id="out"></div>
+    </div>
+    <dialog id="dlg">
+      <h2 style="margin-top: 0">Listas salvas</h2>
+      <div id="lista-salvos"></div>
+      <div class="bar2">
+        <button id="baixar">Baixar texto (.txt)</button
+        ><button id="fechar">Fechar</button>
+      </div>
+    </dialog>
+    <div id="toast"></div>
+
+    <script>
+      // ---------- regras (edite aqui) ----------
+      const REND = {
+        "abobora menina": 27,
+        "abobora verde": 26,
+        chuchu: 28,
+        beterraba: 27,
+        "pimentao verde": 31,
+        cenoura: 35,
+        berinjela: 26,
+        "pepino japones": 34,
+        "pepino rubi": 25,
+        maxixe: 39,
+        "cebola roxa": 28,
+        quiabo: 45,
+      };
+      const UN = {
+        cx: "caixa",
+        caixa: "caixa",
+        bj: "bandeja",
+        bdj: "bandeja",
+        band: "bandeja",
+        bandeja: "bandeja",
+        sc: "saco",
+        saco: "saco",
+        moi: "molho",
+        molho: "molho",
+        kg: "kg",
+        quilo: "kg",
+      };
+      const AB = {
+        caixa: "cx",
+        bandeja: "bj",
+        saco: "sc",
+        molho: "moi",
+        kg: "kg",
+      };
+      const PAL = {
+        kabotia: "abóbora cabotiá",
+        cabutia: "abóbora cabotiá",
+        cabotia: "abóbora cabotiá",
+        abobora: "abóbora",
+        cara: "cará",
+        medio: "médio",
+        hortela: "hortelã",
+        brocolis: "brócolis",
+        pimentao: "pimentão",
+        japones: "japonês",
+      };
+      // ---------- leitura ----------
+      const HEADER = /^\[[^\]]*\]\s*(?:\+?[\d\s\-()]{6,})?\s*:?\s*(.*)$/;
+      const QTD = /^(\d+\s*\/\s*\d+|\d+(?:[.,]\d+)?|mei[oa]?)\s+(.+)$/i;
+      const OBS =
+        /(placa|nota|boleto|(?:^|\s)[aà]s?\s+\d|\d{1,2}:\d{2}|\brua\b|avenida|quadra|endere)/i;
+      const SKIP = /^(encaminhada|\d{1,2}:\d{2})$/i;
+      const get = (o, k) => (Object.hasOwn(o, k) ? o[k] : undefined);
+      const sem = (s) =>
+        s.normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+      const fmt = (n) =>
+        n.toLocaleString("pt-BR", { maximumFractionDigits: 2 });
+      const esc = (s) =>
+        String(s).replace(
+          /[&<>"]/g,
+          (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c],
+        );
+      const qtd = (s) => {
+        s = s.trim().toLowerCase();
+        if (s.includes("/")) {
+          const [a, b] = s.split("/");
+          return +a / +b;
+        }
+        if (s.startsWith("mei")) return 0.5;
+        return parseFloat(s.replace(",", "."));
+      };
+      const nome = (tk) => {
+        const s = tk
+          .map((w) => get(PAL, sem(w)) || w.toLowerCase())
+          .join(" ")
+          .replace("abóbora abóbora", "abóbora");
+        return s === "pimentão" ? "pimentão verde" : s;
+      };
+      const rend = (p) => {
+        const n = sem(p);
+        for (const k in REND)
+          if (n === k || n.startsWith(k + " ")) return REND[k];
+        return null;
+      };
+      const padrao = (p) => {
+        const n = sem(p);
+        if (/^(abacate|abobora cabotia|repolho)/.test(n)) return "caixa";
+        if (/^(couve|brocolis|tomate cereja)/.test(n) || rend(p))
+          return "bandeja";
+        return null;
+      };
+      const txt = (it) =>
+        `${fmt(it.qtd)} ${it.un} ${it.produto}${it.obs ? ` (${it.obs})` : ""}`;
+
+      function item(c, l, idx, duv) {
+        const m = l.match(QTD),
+          q = qtd(m[1]),
+          ob = [];
+        let tk = m[2]
+          .trim()
+          .split(/\s+/)
+          .filter((w) => {
+            if (sem(w).startsWith("reposic")) {
+              ob.push("reposição");
+              return false;
+            }
+            return true;
+          });
+        let un = null;
+        if (tk.length > 1 && get(UN, sem(tk[0]))) un = get(UN, sem(tk.shift()));
+        else if (tk.length > 1 && get(UN, sem(tk[tk.length - 1])))
+          un = get(UN, sem(tk.pop()));
+        const prod = nome(tk),
+          pad = padrao(prod);
+        let av = null;
+        if (!un) {
+          if (!pad) {
+            duv.push({
+              cliente: c.nome,
+              linha: l,
+              idx,
+              motivo: "unidade faltando",
+              falta: true,
+            });
+            return;
+          }
+          un = pad;
+        } else if (
+          pad &&
+          pad !== un &&
+          !(un === "kg" && sem(prod).startsWith("tomate cereja")) &&
+          !(un === "caixa" && rend(prod))
+        )
+          av = `unidade diferente da regra (padrão: ${pad})`;
+        c.itens.push({ produto: prod, qtd: q, un, obs: ob.join(", "), av });
+      }
+
+      function parse(text) {
+        const ls = text.split(/\r?\n/),
+          cl = new Map(),
+          duv = [];
+        let at = null;
+        const nextItem = (i) => {
+          for (let j = i + 1; j < ls.length; j++) {
+            let n = ls[j].replace(/\u200e/g, "").trim();
+            if (!n) continue;
+            if (HEADER.test(n)) return false;
+            n = n.replace(/\*/g, "").trim();
+            if (SKIP.test(n)) continue;
+            return QTD.test(n);
+          }
+          return false;
+        };
+        ls.forEach((raw, i) => {
+          let l = raw.replace(/\u200e/g, "").trim();
+          const h = l.match(HEADER);
+          if (h) {
+            at = null;
+            l = h[1].trim();
+          }
+          l = l.replace(/\*/g, "").trim();
+          if (!l || SKIP.test(l)) return;
+          if (QTD.test(l)) {
+            if (!at) {
+              duv.push({
+                cliente: "(sem cliente)",
+                linha: l,
+                idx: i,
+                motivo: "item sem nome de cliente",
+              });
+              return;
+            }
+            item(at, l, i, duv);
+          } else if (at && OBS.test(l)) at.obs.push(l);
+          else if (nextItem(i)) {
+            const k = sem(l).trim();
+            if (!cl.has(k)) cl.set(k, { nome: l, itens: [], obs: [] });
+            at = cl.get(k);
+          } else if (at) {
+            if (at.itens.length) {
+              const u = at.itens[at.itens.length - 1];
+              u.obs = u.obs ? u.obs + ", " + l : l;
+            } else at.obs.push(l);
+          } else
+            duv.push({
+              cliente: "(sem cliente)",
+              linha: l,
+              idx: i,
+              motivo: "linha não entendida",
+            });
+        });
+        return { cl, duv };
+      }
+
+      // ---------- lista ----------
+      function lista(cl) {
+        const g = new Map(),
+          pend = [];
+        for (const c of cl.values())
+          for (const it of c.itens) {
+            if (it.av) {
+              pend.push({ c: c.nome, t: txt(it), m: it.av });
+              continue;
+            }
+            const tab =
+                rend(it.produto) && (it.un === "bandeja" || it.un === "caixa"),
+              un = tab ? "bandeja" : it.un,
+              k = sem(it.produto) + "|" + un;
+            if (!g.has(k)) g.set(k, []);
+            g.get(k).push(it);
+          }
+        const rows = [...g.entries()]
+          .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+          .map(([k, its]) => {
+            const p = its[0].produto,
+              r = rend(p),
+              tab = r && k.endsWith("|bandeja");
+            let total = 0;
+            const partes = its.map((it) => {
+              let v = it.qtd,
+                s;
+              if (tab && it.un === "caixa") {
+                v = it.qtd * r;
+                s = `(${fmt(it.qtd)} cx×${r}=${fmt(v)})`;
+              } else s = fmt(v);
+              total += v;
+              return s;
+            });
+            const un = tab ? "bandeja" : its[0].un,
+              conta = `${partes.join("+")} = ${fmt(total)} ${AB[un]}`;
+            if (!tab) return { p, un, total, conta, tab: false };
+            const sug = Math.ceil(total / r - 1e-9);
+            return {
+              p,
+              un,
+              total,
+              conta,
+              tab: true,
+              ex: Math.round((total / r) * 100) / 100,
+              sug,
+              sobra: sug * r - total,
+            };
+          });
+        return { rows, pend };
+      }
+
+      function nomesParecidos(cl) {
+        const ks = [...cl.entries()],
+          av = [];
+        for (let i = 0; i < ks.length; i++)
+          for (let j = i + 1; j < ks.length; j++) {
+            const a = sem(ks[i][1].nome).trim(),
+              b = sem(ks[j][1].nome).trim();
+            if (a.includes(b) || b.includes(a))
+              av.push(
+                `Nomes parecidos: ${ks[i][1].nome} e ${ks[j][1].nome} (tratados como clientes diferentes)`,
+              );
+          }
+        return av;
+      }
+
+      // ---------- tela ----------
+      const $ = (id) => document.getElementById(id);
+      let ultima = null;
+      function render() {
+        const text = $("txt").value;
+        try {
+          localStorage.setItem("pedidos-ceasa", text);
+        } catch (e) {}
+        status();
+        if (!text.trim()) {
+          ultima = null;
+          $("out").innerHTML =
+            '<p class="vazio">Cole os pedidos na caixa ao lado.</p>';
+          return;
+        }
+        const { cl, duv } = parse(text),
+          L = lista(cl);
+        ultima = L;
+        let h = "";
+        if (duv.length) {
+          h +=
+            `<div class="box err"><h3>Dúvidas (${duv.length})</h3>` +
+            duv
+              .map(
+                (d) =>
+                  `<p><b>${esc(d.cliente)}</b>: "${esc(d.linha)}" — ${esc(d.motivo)}` +
+                  (d.falta
+                    ? " &nbsp;" +
+                      Object.keys(AB)
+                        .map(
+                          (u) =>
+                            `<button data-i="${d.idx}" data-u="${AB[u]}">${u}</button>`,
+                        )
+                        .join(" ")
+                    : "") +
+                  "</p>",
+              )
+              .join("") +
+            "</div>";
+        }
+        const av = nomesParecidos(cl);
+        if (av.length)
+          h +=
+            '<div class="box warn">' +
+            av.map((a) => `<p>⚠ ${esc(a)}</p>`).join("") +
+            "</div>";
+        h += "<h2>Lista de compra</h2>";
+        if (!L.rows.length)
+          h += '<p class="vazio">Nenhum item reconhecido ainda.</p>';
+        else
+          h +=
+            '<div class="wrap"><table><thead><tr><th>Produto</th><th class="n">Total</th><th class="n">Caixas exatas</th><th class="n">Comprar (cx)</th><th class="n">Sobra (bj)</th><th>Conta</th></tr></thead><tbody>' +
+            L.rows
+              .map(
+                (r) =>
+                  `<tr><td>${esc(r.p)}</td><td class="n">${fmt(r.total)} ${AB[r.un]}</td><td class="n">${r.tab ? fmt(r.ex) : "—"}</td><td class="n"><b>${r.tab ? r.sug : "—"}</b></td><td class="n">${r.tab ? fmt(r.sobra) : "—"}</td><td class="conta">${esc(r.conta)}</td></tr>`,
+              )
+              .join("") +
+            "</tbody></table></div>";
+        if (L.pend.length)
+          h +=
+            '<h2>⚠ Pendentes de confirmação (não incluídos no total)</h2><div class="box warn">' +
+            L.pend
+              .map(
+                (p) => `<p><b>${esc(p.c)}</b>: ${esc(p.t)} — ${esc(p.m)}</p>`,
+              )
+              .join("") +
+            "</div>";
+        h += "<h2>Por cliente</h2>";
+        for (const c of cl.values()) {
+          const soma = new Map();
+          for (const it of c.itens) {
+            const k = sem(it.produto) + "|" + it.un + "|" + !!it.av;
+            const x = soma.get(k) || { ...it, qtd: 0, obs: new Set() };
+            x.qtd += it.qtd;
+            if (it.obs) x.obs.add(it.obs);
+            soma.set(k, x);
+          }
+          h +=
+            `<div class="cli"><h3>${esc(c.nome)}</h3><ul>` +
+            [...soma.values()]
+              .map(
+                (x) =>
+                  `<li>${esc(txt({ ...x, obs: "" }))}${x.av ? " ⚠" : ""}${x.obs.size ? ` <span class="mut">— ${esc([...x.obs].join(", "))}</span>` : ""}</li>`,
+              )
+              .join("") +
+            "</ul>" +
+            c.obs.map((o) => `<div class="mut">Obs: ${esc(o)}</div>`).join("") +
+            "</div>";
+        }
+        $("out").innerHTML = h;
+      }
+
+      const SK = "pedidos-ceasa-salvos";
+      let curId = null;
+      const lerSalvos = () => {
+        try {
+          return JSON.parse(localStorage.getItem(SK) || "[]");
+        } catch (e) {
+          return [];
+        }
+      };
+      const gravaSalvos = (a) => {
+        try {
+          localStorage.setItem(SK, JSON.stringify(a));
+          return true;
+        } catch (e) {
+          return false;
+        }
+      };
+      function toast(m) {
+        const t = $("toast");
+        t.textContent = m;
+        t.classList.add("on");
+        clearTimeout(toast.h);
+        toast.h = setTimeout(() => t.classList.remove("on"), 1800);
+      }
+      function status() {
+        const t = $("txt").value,
+          sv = lerSalvos().find((x) => x.id === curId),
+          ok = !!sv && sv.texto === t;
+        $("st").textContent = !t.trim() ? "" : ok ? "Salvo ✓" : "Não salvo";
+        $("st").className = "st " + (ok ? "ok" : "nok");
+      }
+      function aba(x) {
+        $("app").dataset.t = x;
+        $("tIn").setAttribute("aria-pressed", x === "in");
+        $("tOut").setAttribute("aria-pressed", x === "out");
+        window.scrollTo(0, 0);
+      }
+      $("tIn").onclick = () => aba("in");
+      $("tOut").onclick = () => aba("out");
+
+      function addTexto(novo) {
+        const t = $("txt");
+        if (!novo.trim()) return;
+        t.value += (t.value && !/\n$/.test(t.value) ? "\n" : "") + novo;
+        t.scrollTop = t.scrollHeight;
+        render();
+      }
+      $("txt").addEventListener("input", render);
+      $("txt").addEventListener("paste", (e) => {
+        const t = $("txt");
+        if (
+          t.value &&
+          t.selectionStart === t.value.length &&
+          !/\n$/.test(t.value)
+        ) {
+          e.preventDefault();
+          addTexto((e.clipboardData || window.clipboardData).getData("text"));
+        }
+      });
+      $("colar").onclick = () => {
+        if (!navigator.clipboard || !navigator.clipboard.readText) {
+          toast("Toque na caixa e use Colar do teclado");
+          return;
+        }
+        navigator.clipboard.readText().then(
+          (t) => {
+            if (!t.trim()) {
+              toast("Nada copiado");
+              return;
+            }
+            addTexto(t);
+            aba("out");
+          },
+          () => toast("Toque na caixa e use Colar do teclado"),
+        );
+      };
+
+      function salvar() {
+        const t = $("txt").value;
+        if (!t.trim()) {
+          toast("Nada para salvar");
+          return;
+        }
+        const a = lerSalvos(),
+          d = new Date();
+        let sv = a.find((x) => x.id === curId);
+        if (sv) sv.texto = t;
+        else {
+          sv = {
+            id: Date.now(),
+            nome:
+              d.toLocaleDateString("pt-BR", {
+                day: "2-digit",
+                month: "2-digit",
+              }) +
+              " às " +
+              d.toLocaleTimeString("pt-BR", {
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+            texto: t,
+          };
+          a.unshift(sv);
+          curId = sv.id;
+        }
+        toast(gravaSalvos(a) ? "Salvo" : "Não consegui salvar neste navegador");
+        status();
+      }
+      $("salvar").onclick = salvar;
+
+      function listaSalvos() {
+        const a = lerSalvos();
+        $("lista-salvos").innerHTML = a.length
+          ? a
+              .map((s) => {
+                const n = (s.texto.match(/^\s*\S/gm) || []).length;
+                return `<div class="sv"><div><b>${esc(s.nome)}</b><div class="mut">${n} linhas${s.id === curId ? ", aberta agora" : ""}</div></div><div><button data-a="abrir" data-id="${s.id}">Abrir</button> <button data-a="del" data-id="${s.id}">Apagar</button></div></div>`;
+              })
+              .join("")
+          : '<p class="mut">Nenhuma lista salva ainda. Toque em Salvar.</p>';
+      }
+      $("salvos").onclick = () => {
+        listaSalvos();
+        $("dlg").showModal();
+      };
+      $("fechar").onclick = () => $("dlg").close();
+      $("lista-salvos").addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-a]");
+        if (!b) return;
+        const id = +b.dataset.id,
+          a = lerSalvos(),
+          sv = a.find((x) => x.id === id);
+        if (!sv) return;
+        if (b.dataset.a === "abrir") {
+          const t = $("txt").value,
+            atual = a.find((x) => x.id === curId);
+          if (
+            t.trim() &&
+            !(atual && atual.texto === t) &&
+            !confirm("A lista atual não está salva. Substituir mesmo assim?")
+          )
+            return;
+          $("txt").value = sv.texto;
+          curId = id;
+          render();
+          $("dlg").close();
+        } else if (confirm('Apagar a lista "' + sv.nome + '"?')) {
+          gravaSalvos(a.filter((x) => x.id !== id));
+          if (curId === id) curId = null;
+          status();
+          listaSalvos();
+        }
+      });
+      $("baixar").onclick = () => {
+        const t = $("txt").value;
+        if (!t.trim()) {
+          toast("Nada para baixar");
+          return;
+        }
+        const u = URL.createObjectURL(
+            new Blob([t], { type: "text/plain;charset=utf-8" }),
+          ),
+          a = document.createElement("a");
+        a.href = u;
+        a.download =
+          "pedidos-" + new Date().toISOString().slice(0, 10) + ".txt";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(u), 1000);
+      };
+
+      $("limpar").onclick = () => {
+        const t = $("txt").value;
+        if (!t.trim()) return;
+        const sv = lerSalvos().find((x) => x.id === curId);
+        if (
+          confirm(
+            sv && sv.texto === t
+              ? "Limpar a lista da tela? Ela continua em Salvos."
+              : "Esta lista NÃO está salva. Limpar mesmo assim?",
+          )
+        ) {
+          $("txt").value = "";
+          curId = null;
+          render();
+        }
+      };
+      $("copiar").onclick = () => {
+        if (!ultima) return;
+        const t = ultima.rows
+          .map((r) =>
+            r.tab
+              ? `${r.p}: comprar ${r.sug} cx (${r.conta})`
+              : `${r.p}: ${r.conta}`,
+          )
+          .join("\n");
+        navigator.clipboard.writeText(t).then(
+          () => toast("Lista copiada"),
+          () => prompt("Copie o texto:", t),
+        );
+      };
+      $("out").addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-i]");
+        if (!b) return;
+        const ls = $("txt").value.split(/\r?\n/),
+          i = +b.dataset.i;
+        ls[i] = ls[i].replace(/\s+$/, "") + " " + b.dataset.u;
+        $("txt").value = ls.join("\n");
+        render();
+      });
+      try {
+        $("txt").value = localStorage.getItem("pedidos-ceasa") || "";
+      } catch (e) {}
+      render();
+    </script>
+  </body>
+</html>
