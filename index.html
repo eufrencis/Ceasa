@@ -7,6 +7,9 @@
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
     <title>Pedidos CEASA</title>
+    <script>
+      document.documentElement.classList.add("lock");
+    </script>
     <link rel="manifest" href="manifest.webmanifest" />
     <link rel="apple-touch-icon" href="icon-180.png" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -919,9 +922,194 @@
           display: none;
         }
       }
+      /* ---------- tela de senha ---------- */
+      #gate {
+        display: none;
+      }
+      html.lock #gate {
+        display: flex;
+        position: fixed;
+        inset: 0;
+        z-index: 9999;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: var(--hd);
+      }
+      html.lock body > *:not(#gate) {
+        display: none !important;
+      }
+      #gate .gbox {
+        width: 100%;
+        max-width: 340px;
+        background: var(--card);
+        color: var(--ink);
+        border-radius: 14px;
+        padding: 22px 20px;
+        text-align: center;
+      }
+      #gate #gLogo {
+        display: block;
+        height: 88px;
+        width: auto;
+        margin: 0 auto 18px;
+        border-radius: 12px;
+      }
+      #gate h1 {
+        font-size: 20px;
+        margin: 0 0 4px;
+      }
+      #gate p {
+        margin: 0 0 14px;
+        color: var(--mut);
+        font-size: 14px;
+      }
+      #gate input {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+      #gate button {
+        width: 100%;
+      }
+      #gErr {
+        min-height: 20px;
+        margin: 10px 0 0;
+        color: var(--erri);
+        font-size: 13.5px;
+      }
     </style>
   </head>
   <body>
+    <div id="gate">
+      <div class="gbox">
+        <img id="gLogo" alt="Naturalle Hortifruti" />
+        <input
+          id="gPw"
+          type="password"
+          autocomplete="current-password"
+          placeholder="Senha"
+        />
+        <button id="gBtn" class="pri" type="button">Entrar</button>
+        <div id="gErr" role="alert"></div>
+      </div>
+    </div>
+    <script>
+      // ---------- Senha de acesso ----------
+      // Para trocar a senha: gere o SHA-256 da nova senha e cole abaixo.
+      const SENHA_HASH =
+        "c8d219c7e6def5a61c3da2131133b471f4cc8092a3d283949d2100632c4e38b1";
+      const LEMBRAR_DIAS = 15; // dias que o aparelho fica liberado (0 = pede sempre)
+      const KA = "ceasa-acesso"; // fora do prefixo "pedidos-ceasa" p/ não entrar no backup
+      function sha256(ascii) {
+        function rr(v, a) {
+          return (v >>> a) | (v << (32 - a));
+        }
+        var mp = Math.pow,
+          mx = mp(2, 32),
+          len = "length",
+          i,
+          j,
+          result = "";
+        var words = [],
+          bitLen = ascii[len] * 8;
+        var hash = (sha256.h = sha256.h || []),
+          k = (sha256.k = sha256.k || []),
+          pc = k[len];
+        var isComposite = {};
+        for (var cand = 2; pc < 64; cand++) {
+          if (!isComposite[cand]) {
+            for (i = 0; i < 313; i += cand) isComposite[i] = cand;
+            hash[pc] = (mp(cand, 0.5) * mx) | 0;
+            k[pc++] = (mp(cand, 1 / 3) * mx) | 0;
+          }
+        }
+        ascii += "\x80";
+        while ((ascii[len] % 64) - 56) ascii += "\x00";
+        for (i = 0; i < ascii[len]; i++) {
+          j = ascii.charCodeAt(i);
+          words[i >> 2] |= j << (((3 - i) % 4) * 8);
+        }
+        words[words[len]] = (bitLen / mx) | 0;
+        words[words[len]] = bitLen;
+        for (j = 0; j < words[len]; ) {
+          var w = words.slice(j, (j += 16)),
+            oldHash = hash;
+          hash = hash.slice(0, 8);
+          for (i = 0; i < 64; i++) {
+            var w15 = w[i - 15],
+              w2 = w[i - 2];
+            var a = hash[0],
+              e = hash[4];
+            var t1 =
+              hash[7] +
+              (rr(e, 6) ^ rr(e, 11) ^ rr(e, 25)) +
+              ((e & hash[5]) ^ (~e & hash[6])) +
+              k[i] +
+              (w[i] =
+                i < 16
+                  ? w[i]
+                  : (w[i - 16] +
+                      (rr(w15, 7) ^ rr(w15, 18) ^ (w15 >>> 3)) +
+                      w[i - 7] +
+                      (rr(w2, 17) ^ rr(w2, 19) ^ (w2 >>> 10))) |
+                    0);
+            var t2 =
+              (rr(a, 2) ^ rr(a, 13) ^ rr(a, 22)) +
+              ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+            hash = [(t1 + t2) | 0].concat(hash);
+            hash[4] = (hash[4] + t1) | 0;
+          }
+          for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+        }
+        for (i = 0; i < 8; i++)
+          for (j = 3; j + 1; j--) {
+            var b = (hash[i] >> (j * 8)) & 255;
+            result += (b < 16 ? 0 : "") + b.toString(16);
+          }
+        return result;
+      }
+      const hashSenha = (s) => sha256(unescape(encodeURIComponent(s)));
+      function liberado() {
+        try {
+          const [h, t] = (localStorage.getItem(KA) || "").split("|");
+          return h === SENHA_HASH && Date.now() - +t < LEMBRAR_DIAS * 864e5;
+        } catch (e) {
+          return false;
+        }
+      }
+      document.addEventListener("DOMContentLoaded", () => {
+        const h = document.querySelector(".logo-img"),
+          g = document.getElementById("gLogo");
+        if (h && g) g.src = h.src;
+        else if (g) g.style.display = "none";
+      });
+      if (liberado()) document.documentElement.classList.remove("lock");
+      let erros = 0;
+      function entrar() {
+        const campo = document.getElementById("gPw"),
+          err = document.getElementById("gErr");
+        if (hashSenha(campo.value) === SENHA_HASH) {
+          try {
+            localStorage.setItem(KA, SENHA_HASH + "|" + Date.now());
+          } catch (e) {}
+          document.documentElement.classList.remove("lock");
+          campo.value = "";
+          return;
+        }
+        erros++;
+        err.textContent = "Senha incorreta.";
+        campo.value = "";
+        campo.focus();
+        const b = document.getElementById("gBtn");
+        b.disabled = true;
+        setTimeout(() => (b.disabled = false), Math.min(erros, 5) * 800);
+      }
+      document.getElementById("gBtn").onclick = entrar;
+      document.getElementById("gPw").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") entrar();
+      });
+    </script>
     <header class="top">
       <div class="brand">
         <img
