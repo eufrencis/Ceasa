@@ -654,8 +654,49 @@
         font-size: 14px;
         color: var(--mut);
       }
-      .sh {
+      .sheet {
         display: none;
+      }
+      .mais {
+        width: 100%;
+        margin-top: 8px;
+      }
+      .sg i {
+        position: absolute;
+        top: 8px;
+        right: 12px;
+        background: #c2410c;
+        color: #fff;
+        border-radius: 99px;
+        font: 700 11px/1 system-ui;
+        padding: 3px 6px;
+        font-style: normal;
+      }
+      .sg i:empty {
+        display: none;
+      }
+      .p-cmp[data-v="reg"] .v-cf,
+      .p-cmp[data-v="cf"] .v-reg {
+        display: none;
+      }
+      .seg i,
+      .cmpb {
+        background: #c2410c;
+        color: #fff;
+        border-radius: 99px;
+        font: 700 11px/1 system-ui;
+        padding: 3px 6px;
+        margin-left: 6px;
+        font-style: normal;
+      }
+      .seg i:empty {
+        display: none;
+      }
+      .cf {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 12px;
+        margin-bottom: 12px;
       }
       .cd {
         border-bottom: 1px solid var(--line);
@@ -683,14 +724,8 @@
         .cols {
           display: block;
         }
-        .nav .lg {
+        #app:not([data-t="cmp"]) .p-cmp {
           display: none;
-        }
-        .nav .sh {
-          display: inline;
-        }
-        .nav button {
-          font-size: 12.5px;
         }
         textarea,
         input,
@@ -761,6 +796,56 @@
         .t {
           font-size: 16px;
         }
+        .nav button.menub {
+          font-size: 16px;
+          font-weight: 700;
+          min-height: 54px;
+          color: var(--ink);
+          background: var(--acs);
+          border: 1px solid var(--ac);
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 10px;
+        }
+        .nav i {
+          right: 8%;
+        }
+        .sheet {
+          position: fixed;
+          inset: 0;
+          z-index: 40;
+          background: #0009;
+          display: flex;
+          align-items: flex-end;
+        }
+        .sheet[hidden] {
+          display: none;
+        }
+        .sg {
+          width: 100%;
+          background: var(--card);
+          border-radius: 18px 18px 0 0;
+          padding: 16px 14px calc(16px + env(safe-area-inset-bottom));
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 10px;
+        }
+        .sg button {
+          position: relative;
+          min-height: 62px;
+          font-size: 16px;
+          font-weight: 600;
+        }
+        .sg button[aria-current="true"] {
+          background: var(--acs);
+          color: var(--ac);
+          border-color: var(--ac);
+        }
+        .sg button:last-child {
+          grid-column: 1/-1;
+        }
       }
       /* No computador: as abas ficam no alto da coluna da direita (uma por vez), em vez de empilhar tudo */
       @media (min-width: 901px) {
@@ -805,6 +890,9 @@
           display: none;
         }
         #app:not([data-d="con"]) .p-con {
+          display: none;
+        }
+        #app:not([data-d="cmp"]) .p-cmp {
           display: none;
         }
       }
@@ -866,7 +954,8 @@
         <section>
           <div class="rtabs">
             <button data-t="buy" aria-current="true">
-              Compra<i id="bP2"></i></button
+              Totais<i id="bP2"></i></button
+            ><button data-t="cmp">Compras<i id="bC2"></i></button
             ><button data-t="cli">Clientes</button
             ><button data-t="med">Medidas</button
             ><button data-t="est">Estoque</button
@@ -876,7 +965,7 @@
             <div id="pend"></div>
             <div class="card">
               <div class="hd">
-                <h2>Lista de compra</h2>
+                <h2>Total dos pedidos</h2>
                 <div class="acts2">
                   <button id="copiar">Copiar</button
                   ><button id="zerar">Zerar lista</button
@@ -884,13 +973,76 @@
                 </div>
               </div>
               <p class="hint" style="margin: 0 0 6px">
-                Digite o estoque de cada produto. “Comprar” é o pedido menos o
-                estoque. Toque em <b>Comprei</b> quando comprar. Ao fechar os
-                pedidos, <b>Consolidar</b> desconta do estoque e guarda a lista
-                na aba <b>Consolidados</b>.
+                Soma dos pedidos dos clientes. “Falta comprar” é o pedido menos
+                o estoque. A compra de verdade (de quem, quanto, conferência) é
+                registrada na aba <b>Compras</b>; se der entrada pela
+                conferência, não use o <b>Comprei</b> do mesmo item. Ao fechar
+                os pedidos, <b>Consolidar</b> desconta do estoque e guarda a
+                lista na aba <b>Consolidados</b>.
               </p>
               <div id="bsum"></div>
               <div id="buy"></div>
+            </div>
+          </div>
+          <div class="p-cmp card" id="cmpCard" data-v="reg">
+            <div class="seg" id="cpSeg">
+              <button data-v="reg" aria-current="true">Registrar</button
+              ><button data-v="cf">Conferência<i id="bC3"></i></button>
+            </div>
+            <div class="v-reg">
+              <h2>Compra feita</h2>
+              <p class="mut" style="margin: 0 0 8px">
+                Diga quem comprou e de quem, e adicione os itens um por vez.
+                Depois toque em <b>Copiar</b> e mande no WhatsApp: quem receber
+                cola em “Colar compra recebida”.
+              </p>
+              <div class="add">
+                <input id="cpC" placeholder="Quem comprou (ex: João)" /><input
+                  id="cpF"
+                  placeholder="Comprou de quem (ex: Roberto)"
+                />
+              </div>
+              <h3 class="sub">Itens (um por vez)</h3>
+              <div class="add">
+                <input
+                  id="cpQ"
+                  inputmode="decimal"
+                  placeholder="qtd"
+                  style="flex: 0 1 80px"
+                /><select id="cpU" aria-label="Unidade"></select
+                ><input
+                  id="cpP"
+                  placeholder="produto (ex: tomate cereja)"
+                  autocapitalize="none"
+                /><button id="cpA" class="pri">+ Item</button>
+              </div>
+              <div id="cpD"></div>
+              <div class="row">
+                <button id="cpS" class="pri">Salvar compra</button>
+              </div>
+              <details class="det">
+                <summary>Colar compra recebida (WhatsApp)</summary>
+                <textarea
+                  id="cpT"
+                  style="height: 110px; margin-top: 8px"
+                  spellcheck="false"
+                  placeholder="Cole aqui o texto copiado"
+                ></textarea>
+                <div class="row"><button id="cpR">Ler texto</button></div>
+              </details>
+              <h3 class="sub">Compras registradas</h3>
+              <div id="cpL"></div>
+            </div>
+            <div class="v-cf">
+              <div class="hd">
+                <h2>Conferência de chegada</h2>
+                <button id="cfPdf">PDF das conferidas</button>
+              </div>
+              <p class="mut" style="margin: 0 0 8px">
+                Digite quanto chegou de cada item. O app mostra se está ok, se
+                faltou ou se sobrou.
+              </p>
+              <div id="cfL"></div>
             </div>
           </div>
           <div class="p-cli card">
@@ -1007,17 +1159,37 @@
       </div>
     </main>
     <nav class="nav">
-      <button data-t="in" aria-current="true">Pedidos</button
-      ><button data-t="buy">Compra<i id="bP"></i></button
-      ><button data-t="cli">Clientes</button
-      ><button data-t="med">Medidas</button><button data-t="est">Estoque</button
-      ><button data-t="con">
-        <span class="lg">Consolidados</span><span class="sh">Consolid.</span>
+      <button id="menuB" class="menub" aria-haspopup="dialog">
+        <span aria-hidden="true">☰</span> <b id="menuT">Pedidos</b
+        ><i id="bM"></i>
       </button>
     </nav>
+    <div class="sheet" id="sheet" hidden>
+      <div class="sg">
+        <button data-t="in" aria-current="true">Pedidos</button
+        ><button data-t="buy">Totais<i id="bP"></i></button
+        ><button data-t="cmp">Compras<i id="bC"></i></button
+        ><button data-t="cli">Clientes</button
+        ><button data-t="med">Medidas</button
+        ><button data-t="est">Estoque</button
+        ><button data-t="con">Consolidados</button>
+      </div>
+    </div>
     <dialog id="dlg">
       <h2 style="margin: 0 0 6px; font-size: 17px">Histórico de listas</h2>
       <div id="lista-salvos"></div>
+      <h3 class="sub">Backup (salvar tudo / levar para outro celular)</h3>
+      <p class="mut" style="margin: 0 0 6px">
+        Guarda pedidos, estoque, compras, conferências, consolidados e histórico
+        num arquivo. Para usar em outro celular, exporte aqui, mande o arquivo
+        (WhatsApp, e-mail…) e toque em <b>Importar</b> lá.
+        <span id="bkInfo"></span>
+      </p>
+      <div class="bar2" style="margin-top: 6px">
+        <button id="bkE" class="pri">Exportar backup</button
+        ><button id="bkI">Importar backup</button>
+      </div>
+      <input type="file" id="bkF" accept=".json,application/json" hidden />
       <div class="bar2">
         <button id="baixar">Baixar lista atual (.txt)</button
         ><button id="fechar">Fechar</button>
@@ -1495,15 +1667,26 @@
         toast.h = setTimeout(() => t.classList.remove("on"), 2200);
       }
       // data-t = aba do celular; data-d = aba da direita no computador
+      const NOMES = {
+        in: "Pedidos",
+        buy: "Totais",
+        cmp: "Compras",
+        cli: "Clientes",
+        med: "Medidas",
+        est: "Estoque",
+        con: "Consolidados",
+      };
       function aba(x) {
         const a = $("app");
         a.dataset.t = x;
         if (x !== "in") a.dataset.d = x;
         document
-          .querySelectorAll(".nav button")
+          .querySelectorAll(".sg button")
           .forEach((b) =>
             b.setAttribute("aria-current", String(b.dataset.t === x)),
           );
+        $("menuT").textContent = NOMES[x] || "";
+        $("sheet").hidden = true;
         document
           .querySelectorAll(".rtabs button")
           .forEach((b) =>
@@ -1512,8 +1695,14 @@
         window.scrollTo(0, 0);
       }
       document
-        .querySelectorAll(".nav button,.rtabs button")
+        .querySelectorAll(".sg button,.rtabs button")
         .forEach((b) => (b.onclick = () => aba(b.dataset.t)));
+      $("menuB").onclick = () => {
+        $("sheet").hidden = false;
+      };
+      $("sheet").onclick = (e) => {
+        if (e.target === $("sheet")) $("sheet").hidden = true;
+      };
 
       function render() {
         const a = $("txt").value,
@@ -1657,6 +1846,7 @@
         renderEst();
         renderResumo();
         renderCons();
+        renderComp();
       }
 
       function renderMed() {
@@ -1766,6 +1956,7 @@
       }
       $("salvos").onclick = () => {
         listaHist();
+        infoBk();
         $("dlg").showModal();
       };
       $("fechar").onclick = () => $("dlg").close();
@@ -2266,25 +2457,27 @@
       }
       function renderCons() {
         $("conL").innerHTML = CONS.length
-          ? CONS.map((c) => {
-              const fl = c.rows.filter((r) => r.falt > 0).length,
-                dt = new Date(c.t).toLocaleString("pt-BR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                });
-              return (
-                `<details class="cd" data-id="${c.id}"><summary><b>${esc(c.nome)}</b><span class="mut"> · ${dt} · ${c.rows.length} produtos${fl ? " · " + fl + " com falta" : ""}</span></summary>` +
-                c.rows
-                  .map(
-                    (r) =>
-                      `<div class="ri"><span class="pn">${esc(r.n)}</span><span class="rq">pedido <b>${fmt(r.pedido)}</b> ${AB[r.u]} · estoque era ${fmt(r.antes)}${r.falt > 0 ? ` · <span class="wn">faltou ${fmt(r.falt)}</span>` : ""}</span></div>`,
-                  )
-                  .join("") +
-                `<div class="bar2"><button data-a="reab">Reabrir</button><button data-a="cp">Copiar</button><button data-a="del">Apagar</button></div></details>`
-              );
-            }).join("")
+          ? CONS.slice(0, LIM.con)
+              .map((c) => {
+                const fl = c.rows.filter((r) => r.falt > 0).length,
+                  dt = new Date(c.t).toLocaleString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                return (
+                  `<details class="cd" data-id="${c.id}"><summary><b>${esc(c.nome)}</b><span class="mut"> · ${dt} · ${c.rows.length} produtos${fl ? " · " + fl + " com falta" : ""}</span></summary>` +
+                  c.rows
+                    .map(
+                      (r) =>
+                        `<div class="ri"><span class="pn">${esc(r.n)}</span><span class="rq">pedido <b>${fmt(r.pedido)}</b> ${AB[r.u]} · estoque era ${fmt(r.antes)}${r.falt > 0 ? ` · <span class="wn">faltou ${fmt(r.falt)}</span>` : ""}</span></div>`,
+                    )
+                    .join("") +
+                  `<div class="bar2"><button data-a="reab">Reabrir</button><button data-a="cp">Copiar</button><button data-a="del">Apagar</button></div></details>`
+                );
+              })
+              .join("") + mais("con", CONS.length)
           : '<p class="vazio">Nenhuma lista consolidada ainda. Ao tocar em Consolidar na aba Compra, a lista vem para cá.</p>';
       }
       $("conL").onclick = (e) => {
@@ -2456,85 +2649,94 @@
         }
         return o;
       }
+      const cap = (s) =>
+        String(s || "").replace(/(^|\s)\S/g, (m) => m.toUpperCase());
       const numW = (s, z) =>
         [...s].reduce(
           (w, c) => w + (c === "," || c === "." || c === " " ? 0.278 : 0.556),
           0,
         ) * z;
-      function gerarPdf() {
-        const rows = resumoRows();
-        if (!rows.length) {
-          toast("Nada no estoque para exportar");
-          return;
-        }
+      function mkPdf(title, sub, cols, rows, fname) {
         const W = 595.28,
           H = 841.89,
           M = 42,
           RH = 19,
+          HH = 40,
           bot = 56,
-          XQ = 395,
-          XC = 470,
-          f2 = (x) => x.toFixed(2);
-        const ysOf = (pi) => (pi === 0 ? H - 104 : H - 58),
-          pages = [];
-        let cur = [];
+          f2 = (x) => x.toFixed(2),
+          ysOf = (pi) => (pi === 0 ? H - 104 : H - 58),
+          pages = [],
+          hh = (x) => (x.h !== undefined ? HH : RH);
+        let cur = [],
+          used = 0;
         for (const r of rows) {
-          if (cur.length >= Math.floor((ysOf(pages.length) - bot) / RH)) {
+          const need = hh(r) + (r.h !== undefined ? RH : 0); // um título de compra nunca fica sozinho no fim da página
+          if (cur.length && used + need > ysOf(pages.length) - bot) {
             pages.push(cur);
             cur = [];
+            used = 0;
           }
           cur.push(r);
+          used += hh(r);
         }
         pages.push(cur);
-        const T = (x, y, z, t, f, g) =>
-          `BT /${f || "F1"} ${z} Tf ${g || "0.1 g"} ${f2(x)} ${f2(y)} Td (${pdfS(t)}) Tj ET\n`;
-        const agora = new Date(),
-          dt =
-            agora.toLocaleDateString("pt-BR", {
-              day: "2-digit",
-              month: "2-digit",
-              year: "numeric",
-            }) +
-            " " +
-            agora.toLocaleTimeString("pt-BR", {
-              hour: "2-digit",
-              minute: "2-digit",
-            });
+        const OK = "0.12 0.5 0.28 rg",
+          WN = "0.8 0.35 0 rg",
+          GR = "0.08 0.25 0.16 rg";
+        const T = (x, y, z, t, f, g, r) =>
+          `BT /${f || "F1"} ${z} Tf ${g || "0.1 g"} ${f2(r ? x - numW(t, z) : x)} ${f2(y)} Td (${pdfS(t)}) Tj ET\n`;
         const streams = pages.map((pg, pi) => {
           const ys = ysOf(pi);
-          let s = "";
-          if (pi === 0) {
+          let s = "",
+            y = ys,
+            k = 0;
+          if (pi === 0)
             s +=
-              T(M, H - 54, 20, "Estoque", "F2", "0.08 0.25 0.16 rg") +
-              T(
-                M,
-                H - 72,
-                10,
-                "Pedidos CEASA · " + dt + " · " + rows.length + " produtos",
-                "F1",
-                "0.4 g",
-              );
-          }
-          const hy = ys + 6;
-          s +=
-            T(M, hy, 9, "PRODUTO", "F2", "0.4 g") +
-            T(XQ - 38, hy, 9, "ESTOQUE", "F2", "0.4 g") +
-            T(XC, hy, 9, "EM CAIXAS", "F2", "0.4 g");
+              T(M, H - 54, 20, title, "F2", GR) +
+              T(M, H - 72, 10, sub, "F1", "0.4 g");
+          for (const c of cols)
+            if (c.h) s += T(c.x, ys + 6, 9, c.h, "F2", "0.4 g", c.r);
           s += `0.75 G 0.8 w ${f2(M)} ${f2(ys + 2)} m ${f2(W - M)} ${f2(ys + 2)} l S\n`;
-          pg.forEach((x, i) => {
-            const y0 = ys - (i + 1) * RH,
-              g = x.q > 0 ? "0.1 g" : "0.55 g";
-            if (i % 2 === 0)
+          for (const x of pg) {
+            const h = hh(x),
+              y0 = y - h;
+            y = y0;
+            if (x.h !== undefined) {
+              k = 0;
+              s +=
+                `0.89 0.93 0.9 rg ${f2(M - 6)} ${f2(y0)} ${f2(W - 2 * M + 12)} 34 re f\n` +
+                T(M, y0 + 20, 12, x.h, "F2", GR) +
+                (x.s ? T(M, y0 + 7, 8.5, x.s, "F1", "0.35 g") : "") +
+                (x.r
+                  ? T(W - M, y0 + 20, 9.5, x.r, "F2", x.rk === 2 ? WN : OK, 1)
+                  : "");
+              continue;
+            }
+            if (k++ % 2 === 0)
               s += `0.955 g ${f2(M - 6)} ${f2(y0)} ${f2(W - 2 * M + 12)} ${RH} re f\n`;
-            const nm = x.n.length > 44 ? x.n.slice(0, 43) + "..." : x.n,
-              q = fmt(x.q);
-            s +=
-              T(M, y0 + 6, 10.5, nm, "F1", g) +
-              T(XQ - numW(q, 10.5), y0 + 6, 10.5, q, "F2", g) +
-              T(XQ + 5, y0 + 6, 10, AB[x.u], "F1", "0.4 g");
-            if (x.cx !== null)
-              s += T(XC, y0 + 6, 10, fmt(x.cx) + " cx", "F1", "0.4 g");
-          });
+            cols.forEach((c, j) => {
+              const t = String(x.c[j] == null ? "" : x.c[j]);
+              if (!t) return;
+              const last = j === cols.length - 1 && x.k;
+              s += T(
+                c.x,
+                y0 + 6,
+                10.5,
+                t.length > 44 ? t.slice(0, 43) + "..." : t,
+                c.b || last ? "F2" : "F1",
+                last
+                  ? x.k === 2
+                    ? WN
+                    : OK
+                  : x.g
+                    ? "0.55 g"
+                    : c.g
+                      ? "0.4 g"
+                      : "0.1 g",
+                c.r,
+              );
+            });
+          }
           s += T(
             W / 2 - 34,
             28,
@@ -2576,14 +2778,592 @@
           ),
           a = document.createElement("a");
         a.href = u;
-        a.download = "estoque-" + agora.toLocaleDateString("sv-SE") + ".pdf";
+        a.download =
+          fname + "-" + new Date().toLocaleDateString("sv-SE") + ".pdf";
         document.body.appendChild(a);
         a.click();
         a.remove();
         setTimeout(() => URL.revokeObjectURL(u), 2000);
-        toast("PDF do estoque gerado");
+        toast("PDF gerado");
+      }
+      function gerarPdf() {
+        const rows = resumoRows();
+        if (!rows.length) {
+          toast("Nada no estoque para exportar");
+          return;
+        }
+        const d = new Date(),
+          dt =
+            d.toLocaleDateString("pt-BR") +
+            " " +
+            d.toLocaleTimeString("pt-BR", {
+              hour: "2-digit",
+              minute: "2-digit",
+            });
+        mkPdf(
+          "Estoque",
+          "Pedidos CEASA · " + dt + " · " + rows.length + " produtos",
+          [
+            { h: "PRODUTO", x: 42 },
+            { h: "ESTOQUE", x: 395, r: 1, b: 1 },
+            { x: 400, g: 1 },
+            { h: "EM CAIXAS", x: 470, g: 1 },
+          ],
+          rows.map((x) => ({
+            g: x.q <= 0,
+            c: [x.n, fmt(x.q), AB[x.u], x.cx !== null ? fmt(x.cx) + " cx" : ""],
+          })),
+          "estoque",
+        );
       }
       $("rsPdf").onclick = gerarPdf;
+
+      // ---------- Compras e conferência ----------
+      // COMP = compras feitas: {id,t,c:comprador,f:fornecedor,its:[{p,u,q,rec}],st:'ag'|'ok',por,obs}. rec = quanto chegou (null = ainda não contado)
+      K.cp = "pedidos-ceasa-compras";
+      let COMP = lj(K.cp, []);
+      if (!Array.isArray(COMP)) COMP = [];
+      const salvarComp = () => {
+        if (COMP.length > 80) COMP.length = 80;
+        lset(K.cp, JSON.stringify(COMP));
+      };
+      const dtf = (t) =>
+        new Date(t).toLocaleString("pt-BR", {
+          day: "2-digit",
+          month: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+      const SPL = new RegExp(
+        "\\s+(?=\\d+(?:[.,]\\d+)?\\s+(?:" + Object.keys(UN).join("|") + ")\\b)",
+        "i",
+      );
+      function parseCompra(t) {
+        // aceita "20 cx tomate cereja" e as linhas "Comprador: X" / "Fornecedor: Y" (texto copiado de outro celular)
+        const its = [];
+        let c = "",
+          f = "",
+          h;
+        for (let l0 of t.split(/\r?\n/)) {
+          l0 = l0.replace(/\*/g, "").trim();
+          if ((h = l0.match(/^comprador\s*:\s*(.+)$/i))) {
+            c = h[1].trim();
+            continue;
+          }
+          if (
+            (h = l0.match(/^(?:fornecedor|comprado de|vendedor)\s*:\s*(.+)$/i))
+          ) {
+            f = h[1].trim();
+            continue;
+          }
+          for (const l of l0.split(SPL)) {
+            // "20 cx tomate 10 bj quiabo" na mesma linha vira 2 itens
+            const m = l.match(QTD);
+            if (!m) continue;
+            const q = qtd(m[1]);
+            let tk = m[2].trim().split(/\s+/),
+              un = null;
+            if (tk.length > 1 && get(UN, sem(tk[0])))
+              un = get(UN, sem(tk.shift()));
+            else if (tk.length > 1 && get(UN, sem(tk[tk.length - 1])))
+              un = get(UN, sem(tk.pop()));
+            if (tk.length > 1 && /^d[eoa]$/.test(sem(tk[0]))) tk.shift();
+            const p = nome(tk);
+            its.push({ p, u: un || padrao(p) || "caixa", q, rec: null });
+          }
+        }
+        return { its, c, f };
+      }
+      const cpTxt = (c) =>
+        `Fornecedor: ${c.f}\nComprador: ${c.c || "-"}\n` +
+        c.its.map((x) => `${fmt(x.q)} ${AB[x.u]} ${x.p}`).join("\n");
+      const dif = (x) => (x.rec == null ? null : r2(x.rec - x.q));
+      const sit = (x) => {
+        const d = dif(x);
+        return d === null
+          ? '<span class="mut">falta contar</span>'
+          : d === 0
+            ? '<span class="ok">ok ✓</span>'
+            : `<span class="wn">${d < 0 ? "faltou" : "sobrou"} ${fmt(Math.abs(d))} ${AB[x.u]}</span>`;
+      };
+      const SEL = new Set(),
+        LIM = { cp: 8, cf: 8, con: 8 }; // SEL = conferidas marcadas para o PDF; LIM = quantas linhas mostrar de cada lista
+      const mais = (k, tot) =>
+        tot > LIM[k]
+          ? `<button class="mais" data-m="${k}">Ver mais (${tot - LIM[k]})</button>`
+          : "";
+      function renderComp() {
+        const pen = COMP.filter((c) => c.st === "ag"),
+          fim = COMP.filter((c) => c.st !== "ag"),
+          ns = fim.filter((c) => SEL.has(c.id)).length;
+        $("bC").textContent =
+          $("bC2").textContent =
+          $("bC3").textContent =
+            pen.length || "";
+        $("bM").textContent = (+$("bP").textContent || 0) + pen.length || "";
+        $("cfPdf").textContent =
+          "PDF das marcadas" + (ns ? " (" + ns + ")" : "");
+        $("cpL").innerHTML = COMP.length
+          ? COMP.slice(0, LIM.cp)
+              .map(
+                (c) =>
+                  `<div class="sv" data-id="${c.id}"><div><b>${esc(cap(c.f))}</b> <span class="mut">· ${esc(cap(c.c) || "sem comprador")} · ${dtf(c.t)}</span><div class="mut">${c.its.map((x) => fmt(x.q) + " " + AB[x.u] + " " + esc(x.p)).join(" · ")}</div>${c.st === "ag" ? '<span class="wn">aguardando conferência</span>' : '<span class="ok">conferida</span>'}</div><div><button data-a="cp">Copiar</button> <button data-a="del">Apagar</button></div></div>`,
+              )
+              .join("") + mais("cp", COMP.length)
+          : '<p class="mut">Nenhuma compra registrada ainda.</p>';
+        $("cfL").innerHTML =
+          (pen.length
+            ? pen
+                .map(
+                  (c) =>
+                    `<div class="cf" data-id="${c.id}"><div class="hd"><div><b>${esc(cap(c.f))}</b><div class="mut">Comprador: ${esc(cap(c.c) || "-")} · ${dtf(c.t)}</div></div><button data-a="all">Tudo certo</button></div>` +
+                    c.its
+                      .map(
+                        (x, i) =>
+                          `<div class="br ${dif(x) === 0 ? "o" : "f"}" data-i="${i}"><div><span class="pn">${esc(x.p)}</span><span class="conta">Comprado ${fmt(x.q)} ${AB[x.u]}</span></div><div class="bc st">${sit(x)}</div><div class="bm"><label>Recebido <input class="ei rc" inputmode="decimal" value="${x.rec == null ? "" : String(x.rec).replace(".", ",")}" placeholder="0"> ${AB[x.u]}</label></div></div>`,
+                      )
+                      .join("") +
+                    `<div class="add"><input class="cfN" placeholder="Conferido por (nome)" value="${esc(c.por || "")}"><input class="cfO" placeholder="Observação (opcional)" value="${esc(c.obs || "")}"></div><label class="chk" style="margin-top:8px"><input type="checkbox" class="cfE" checked> Dar entrada no estoque com o que chegou</label><div class="bar2"><button data-a="fin" class="pri">Concluir conferência</button></div></div>`,
+                )
+                .join("")
+            : '<p class="vazio">Nenhuma compra esperando conferência.</p>') +
+          (fim.length
+            ? `<details class="det" open><summary>Conferidas (${fim.length})</summary><label class="chk" style="margin:8px 0"><input type="checkbox" id="pkAll"${ns === fim.length ? " checked" : ""}> Marcar todas para o PDF</label>` +
+              fim
+                .slice(0, LIM.cf)
+                .map((c) => {
+                  const dv = c.its.filter((x) => dif(x));
+                  return `<div class="sv"><label class="chk" style="align-self:flex-start;padding-top:3px"><input type="checkbox" class="pk" data-id="${c.id}"${SEL.has(c.id) ? " checked" : ""} aria-label="Marcar para o PDF"></label><div style="flex:1"><b>${esc(cap(c.f))}</b> <span class="mut">· conferida por ${esc(cap(c.por) || "-")} · ${dtf(c.tc || c.t)}</span><div>${dv.length ? dv.map((x) => `<span class="wn">${esc(x.p)}: ${(dif(x) < 0 ? "faltou " : "sobrou ") + fmt(Math.abs(dif(x))) + " " + AB[x.u]}</span>`).join(" · ") : '<span class="ok">tudo certo ✓</span>'}${c.obs ? `<div class="mut">${esc(c.obs)}</div>` : ""}</div></div></div>`;
+                })
+                .join("") +
+              mais("cf", fim.length) +
+              "</details>"
+            : "");
+      }
+      $("cfL").addEventListener("change", (e) => {
+        const i = e.target;
+        if (i.classList && i.classList.contains("pk")) {
+          if (i.checked) SEL.add(+i.dataset.id);
+          else SEL.delete(+i.dataset.id);
+          renderComp();
+        } else if (i.id === "pkAll") {
+          COMP.filter((c) => c.st !== "ag").forEach((c) => {
+            if (i.checked) SEL.add(c.id);
+            else SEL.delete(c.id);
+          });
+          renderComp();
+        }
+      });
+      $("app").addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-m]");
+        if (b) {
+          LIM[b.dataset.m] += 8;
+          render();
+        }
+      }); // "Ver mais"
+      $("cpSeg").onclick = (e) => {
+        const b = e.target.closest("button[data-v]");
+        if (!b) return;
+        $("cmpCard").dataset.v = b.dataset.v;
+        $("cpSeg")
+          .querySelectorAll("button")
+          .forEach((x) => x.setAttribute("aria-current", String(x === b)));
+      };
+      $("cpC").value = lget(K.cp + "-c") || "Patrick";
+      $("cpC").onchange = () =>
+        lset(K.cp + "-c", $("cpC").value.trim() || "Patrick");
+      let CPD = []; // itens da compra que está sendo montada
+      $("cpU").innerHTML = Object.keys(AB)
+        .map((u) => `<option${u === "caixa" ? " selected" : ""}>${u}</option>`)
+        .join("");
+      function renderCpd() {
+        $("cpD").innerHTML = CPD.length
+          ? CPD.map(
+              (x, i) =>
+                `<div class="sv"><div><b>${fmt(x.q)} ${AB[x.u]}</b> ${esc(x.p)}</div><button class="xx" data-i="${i}" aria-label="Tirar item">✕</button></div>`,
+            ).join("")
+          : '<p class="mut">Nenhum item ainda.</p>';
+      }
+      $("cpD").onclick = (e) => {
+        const b = e.target.closest("button[data-i]");
+        if (!b) return;
+        CPD.splice(+b.dataset.i, 1);
+        renderCpd();
+      };
+      $("cpP").addEventListener("input", () => {
+        const v = $("cpP").value.trim();
+        if (!v) return;
+        const u = padrao(nome(v.split(/\s+/)));
+        if (u) $("cpU").value = u;
+      });
+      $("cpA").onclick = () => {
+        const q = qtd($("cpQ").value),
+          raw = $("cpP").value.trim().replace(/\s+/g, " ");
+        if (!raw || isNaN(q) || q <= 0) {
+          toast("Preencha a quantidade e o produto");
+          return;
+        }
+        CPD.push({ p: nome(raw.split(" ")), u: $("cpU").value, q, rec: null });
+        $("cpQ").value = "";
+        $("cpP").value = "";
+        renderCpd();
+        $("cpQ").focus();
+      };
+      $("cpP").onkeydown = (e) => {
+        if (e.key === "Enter") $("cpA").onclick();
+      };
+      $("cpR").onclick = () => {
+        const r = parseCompra($("cpT").value);
+        if (!r.its.length) {
+          toast("Não achei itens no texto");
+          return;
+        }
+        if (r.f) $("cpF").value = r.f;
+        if (r.c) $("cpC").value = r.c;
+        CPD = CPD.concat(r.its);
+        $("cpT").value = "";
+        renderCpd();
+        toast(r.its.length + " item(ns) lidos");
+      };
+      $("cpS").onclick = () => {
+        if ($("cpP").value.trim() && $("cpQ").value.trim()) $("cpA").onclick();
+        const f = $("cpF").value.trim(),
+          c = $("cpC").value.trim() || "Patrick";
+        if (!CPD.length) {
+          toast("Adicione pelo menos um item");
+          return;
+        }
+        if (!f) {
+          toast("Diga de quem foi comprado");
+          return;
+        }
+        COMP.unshift({
+          id: Date.now(),
+          t: Date.now(),
+          c,
+          f,
+          its: CPD.map((x) => ({ ...x })),
+          st: "ag",
+        });
+        lset(K.cp + "-c", c);
+        CPD = [];
+        $("cpF").value = "";
+        renderCpd();
+        salvarComp();
+        render();
+        toast("Compra salva: aguardando conferência");
+      };
+      renderCpd();
+      function pdfConf() {
+        const fim = COMP.filter((c) => c.st !== "ag" && SEL.has(c.id));
+        if (!fim.length) {
+          toast("Marque em Conferidas as compras que quer no PDF");
+          return;
+        }
+        const df = (t) =>
+            new Date(t).toLocaleString("pt-BR", {
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          rows = [];
+        for (const c of fim) {
+          const bad = c.its.some((x) => dif(x) !== 0);
+          rows.push({
+            h: cap(c.f),
+            s:
+              "Comprador: " +
+              (cap(c.c) || "-") +
+              "   ·   Conferido por: " +
+              (cap(c.por) || "-") +
+              "   ·   " +
+              df(c.tc || c.t),
+            r: bad ? "Com diferença" : "Tudo certo",
+            rk: bad ? 2 : 1,
+          });
+          for (const x of c.its) {
+            const d = dif(x);
+            rows.push({
+              k: d === 0 ? 1 : 2,
+              c: [
+                cap(x.p),
+                fmt(x.q) + " " + AB[x.u],
+                fmt(x.rec) + " " + AB[x.u],
+                d === 0
+                  ? "OK"
+                  : (d < 0 ? "Faltou " : "Sobrou ") +
+                    fmt(Math.abs(d)) +
+                    " " +
+                    AB[x.u],
+              ],
+            });
+          }
+          if (c.obs) rows.push({ g: 1, c: ["Obs: " + c.obs] });
+        }
+        mkPdf(
+          "Compras conferidas",
+          "Pedidos CEASA · " +
+            fim.length +
+            (fim.length > 1 ? " compras" : " compra") +
+            " · gerado em " +
+            df(Date.now()),
+          [
+            { h: "PRODUTO", x: 42 },
+            { h: "COMPRADO", x: 350, r: 1 },
+            { h: "RECEBIDO", x: 435, r: 1 },
+            { h: "SITUAÇÃO", x: 455 },
+          ],
+          rows,
+          "compras-conferidas",
+        );
+      }
+      $("cfPdf").onclick = pdfConf;
+      $("cpL").onclick = (e) => {
+        const b = e.target.closest("button[data-a]");
+        if (!b) return;
+        const c = COMP.find((x) => x.id === +b.closest(".sv").dataset.id);
+        if (!c) return;
+        if (b.dataset.a === "cp") {
+          const t = cpTxt(c);
+          navigator.clipboard.writeText(t).then(
+            () => toast("Compra copiada"),
+            () => prompt("Copie o texto:", t),
+          );
+        } else if (
+          confirm(
+            'Apagar a compra de "' +
+              c.f +
+              '"?' +
+              (c.st === "ok" ? " O estoque já lançado não muda." : ""),
+          )
+        ) {
+          COMP = COMP.filter((x) => x.id !== c.id);
+          salvarComp();
+          render();
+        }
+      };
+      const cfCompra = (e) => {
+        const k = e.target.closest(".cf");
+        return k ? COMP.find((x) => x.id === +k.dataset.id) : null;
+      };
+      $("cfL").addEventListener("input", (e) => {
+        // digitando o recebido: atualiza só a linha (não perde o foco)
+        const i = e.target.closest("input.rc");
+        if (!i) return;
+        const c = cfCompra(e),
+          row = i.closest(".br");
+        if (!c) return;
+        const x = c.its[+row.dataset.i],
+          v = i.value.trim() === "" ? null : qtd(i.value);
+        x.rec = v !== null && !isNaN(v) && v >= 0 ? v : null;
+        row.querySelector(".st").innerHTML = sit(x);
+        row.className = "br " + (dif(x) === 0 ? "o" : "f");
+        salvarComp();
+      });
+      $("cfL").addEventListener("change", (e) => {
+        const c = cfCompra(e);
+        if (!c) return;
+        const k = e.target.closest(".cf");
+        c.por = k.querySelector(".cfN").value.trim();
+        c.obs = k.querySelector(".cfO").value.trim();
+        salvarComp();
+      });
+      $("cfL").addEventListener("click", (e) => {
+        const b = e.target.closest("button[data-a]");
+        if (!b) return;
+        const c = cfCompra(e),
+          k = b.closest(".cf");
+        if (!c) return;
+        if (b.dataset.a === "all") {
+          c.its.forEach((x) => (x.rec = x.q));
+          salvarComp();
+          renderComp();
+          return;
+        }
+        c.por = k.querySelector(".cfN").value.trim();
+        c.obs = k.querySelector(".cfO").value.trim();
+        if (!c.por) {
+          toast("Escreva quem conferiu");
+          return;
+        }
+        const sem0 = c.its.filter((x) => x.rec == null),
+          dv = c.its.filter((x) => x.rec != null && dif(x) !== 0);
+        if (
+          sem0.length &&
+          !confirm(
+            "Faltam contar: " +
+              sem0.map((x) => x.p).join(", ") +
+              ".\nConcluir assim mesmo? Eles contam como 0 recebido.",
+          )
+        )
+          return;
+        if (
+          dv.length &&
+          !confirm(
+            "Diferenças:\n" +
+              dv
+                .map(
+                  (x) =>
+                    "• " +
+                    x.p +
+                    ": " +
+                    (dif(x) < 0 ? "faltou " : "sobrou ") +
+                    fmt(Math.abs(dif(x))) +
+                    " " +
+                    AB[x.u],
+                )
+                .join("\n") +
+              "\n\nConcluir mesmo assim?",
+          )
+        )
+          return;
+        c.its.forEach((x) => {
+          if (x.rec == null) x.rec = 0;
+        });
+        c.st = "ok";
+        c.tc = Date.now();
+        if (k.querySelector(".cfE").checked)
+          for (const x of c.its)
+            if (x.rec > 0) {
+              // entra no estoque na mesma unidade da lista (caixa -> bandeja/unidade nos produtos de tabela)
+              const r = rend(x.p);
+              let u = x.u,
+                q = x.rec;
+              if (r && (u === "caixa" || u === baseTab(x.p))) {
+                if (u === "caixa") q *= r;
+                u = baseTab(x.p);
+              }
+              movEst("in", sem(x.p) + "|" + u, x.p, u, q);
+            }
+        salvarComp();
+        render();
+        toast("Conferência concluída" + (dv.length ? " (com diferenças)" : ""));
+      });
+
+      // ---------- Backup: exportar / importar tudo ----------
+      K.bk = "pedidos-ceasa-bk"; // data do último backup (não entra no arquivo)
+      const chavesApp = () => {
+        const r = [];
+        try {
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith("pedidos-ceasa") && k !== K.bk) r.push(k);
+          }
+        } catch (e) {}
+        return r;
+      };
+      function infoBk() {
+        const t = +lget(K.bk),
+          e = $("bkInfo");
+        if (!t) {
+          e.innerHTML = '<b class="wn">Nenhum backup feito ainda.</b>';
+          return;
+        }
+        const d = Math.floor((Date.now() - t) / 864e5);
+        e.innerHTML =
+          (d >= 7 ? '<b class="wn">' : "<b>") +
+          "Último backup: " +
+          new Date(t).toLocaleDateString("pt-BR") +
+          (d >= 7 ? " (faz " + d + " dias)" : "") +
+          "</b>";
+      }
+      $("bkE").onclick = async () => {
+        render(); // grava o que está nas caixas de texto
+        const dados = {};
+        for (const k of chavesApp()) dados[k] = localStorage.getItem(k);
+        const txt = JSON.stringify({
+            app: "pedidos-ceasa",
+            v: 1,
+            t: Date.now(),
+            dados,
+          }),
+          nome =
+            "backup-ceasa-" + new Date().toLocaleDateString("sv-SE") + ".json";
+        const f =
+          typeof File === "function"
+            ? new File([txt], nome, { type: "application/json" })
+            : null;
+        if (
+          f &&
+          navigator.canShare &&
+          matchMedia("(pointer:coarse)").matches &&
+          navigator.canShare({ files: [f] })
+        ) {
+          // celular: abre a folha de compartilhar (WhatsApp, Arquivos…)
+          try {
+            await navigator.share({
+              files: [f],
+              title: "Backup Pedidos CEASA",
+            });
+            lset(K.bk, String(Date.now()));
+            infoBk();
+            toast("Backup pronto");
+            return;
+          } catch (e) {
+            if (e && e.name === "AbortError") return;
+          }
+        }
+        const u = URL.createObjectURL(
+            new Blob([txt], { type: "application/json" }),
+          ),
+          a = document.createElement("a");
+        a.href = u;
+        a.download = nome;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(() => URL.revokeObjectURL(u), 2000);
+        lset(K.bk, String(Date.now()));
+        infoBk();
+        toast("Backup salvo: " + nome);
+      };
+      $("bkI").onclick = () => $("bkF").click();
+      $("bkF").onchange = (e) => {
+        const f = e.target.files[0];
+        e.target.value = "";
+        if (!f) return;
+        const r = new FileReader();
+        r.onload = () => {
+          let o = null;
+          try {
+            o = JSON.parse(r.result);
+          } catch (x) {}
+          if (
+            !o ||
+            o.app !== "pedidos-ceasa" ||
+            !o.dados ||
+            typeof o.dados !== "object"
+          ) {
+            toast("Esse arquivo não é um backup do Pedidos CEASA");
+            return;
+          }
+          if (
+            !confirm(
+              "Importar o backup de " +
+                new Date(o.t).toLocaleString("pt-BR") +
+                "?\n\nTUDO que está neste aparelho (pedidos, estoque, compras, histórico) será SUBSTITUÍDO pelo conteúdo do arquivo.\n\nSe tem dados aqui que não estão no arquivo, cancele e exporte um backup antes.",
+            )
+          )
+            return;
+          try {
+            chavesApp().forEach((k) => localStorage.removeItem(k));
+            for (const [k, v] of Object.entries(o.dados))
+              if (
+                k.startsWith("pedidos-ceasa") &&
+                k !== K.bk &&
+                typeof v === "string"
+              )
+                localStorage.setItem(k, v);
+            lset(K.bk, String(Date.now()));
+            location.reload();
+          } catch (x) {
+            toast("Não foi possível importar (sem espaço no aparelho?)");
+          }
+        };
+        r.readAsText(f);
+      };
 
       $("txt").value = lget(K.a) || "";
       $("novo").value = lget(K.c) || "";
